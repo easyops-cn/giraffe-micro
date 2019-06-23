@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+import "code.proto";
+import "google/protobuf/struct.proto";
+import "google/protobuf/any.proto";
+
+package status;
+
+message Status {
+
+    // 错误码, 由 giraffe.status.Code 统一定义
+    Code code = 1;
+
+    // 错误描述, 由错误码翻译+错误解释组成, 面向研发者, 要求全英文编写
+    string error = 2;
+
+    // 错误解释, 面向用户, 用业务语言描述
+    string message = 3;
+
+    // 错误的详细信息, map格式
+    google.protobuf.Struct data = 4;
+
+    // 错误的详细信息, any格式
+    repeated google.protobuf.Any details = 5;
+}

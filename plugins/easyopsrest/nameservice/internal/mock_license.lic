@@ -1,0 +1,13 @@
+Product-Name = easyops
+CMDBExpires = 15-May-2029
+DeployExpires = 15-May-2029
+Product-Edition = Enterprise
+Registered-To = user_0
+MonitorExpires = 15-May-2029
+Expires = 15-May-2029
+Hardware-Locked = No
+Host-ID = Not-Locked
+Easyops-Code = mock-code
+ITOAExpires = 15-May-2029
+Custom-Object-Limit = 99999
+DeviceNum = 9999999
