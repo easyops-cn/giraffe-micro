@@ -23,10 +23,10 @@ func parseResponse(resp *http.Response, out interface{}) error {
 	// 尝试解释 body, 解释失败则返回未知错误
 	data, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return gerr.UnknownErrorf("%s, unexpected error %#v when reading response body", resp.Status, err)
+		return gerr.UnknownErrorf("%s, unexpected error when reading response body: %s", resp.Status, err.Error())
 	}
 	if err := json.Unmarshal(data, body); err != nil {
-		return gerr.UnknownErrorf("%s, unexpected response body: %#v", resp.Status, err)
+		return gerr.UnknownErrorf("%s, unexpected response body: %s", resp.Status, err.Error())
 	}
 
 	// 错误码不为0, 返回标准错误
@@ -41,7 +41,7 @@ func parseResponse(resp *http.Response, out interface{}) error {
 
 	// 状态码正常, 错误码正常, 解析 message
 	if err := jsonpbUnmarshaler.Unmarshal(bytes.NewReader(body.Data), out.(proto.Message)); err != nil {
-		return gerr.UnknownErrorf("%s, unexpected message when unmarshal body data: %#v", resp.Status, err)
+		return gerr.UnknownErrorf("%s, unexpected message when unmarshal body data: %s", resp.Status, err.Error())
 	}
 	return nil
 }

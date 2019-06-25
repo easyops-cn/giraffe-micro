@@ -7,8 +7,9 @@ import (
 	"strings"
 )
 
-type ens struct {
-}
+var DefaultNS = &ens{}
+
+type ens struct {}
 
 func (e *ens) GetAddress(contract giraffe.Contract) (*giraffe.Address, error) {
 	name := contract.Name()

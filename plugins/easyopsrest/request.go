@@ -133,7 +133,7 @@ func newRequest(contract giraffe.Contract, pb proto.Message) (*http.Request, err
 	}
 
 	if reader != nil {
-		request.Header.Add("Content-Typ", "application/json")
+		request.Header.Add("Content-Type", "application/json")
 	}
 
 	return request, nil
