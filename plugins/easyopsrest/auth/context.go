@@ -6,9 +6,13 @@ import (
 	"strconv"
 )
 
-type key struct{}
+type keyType struct{}
 
-var ctxKey = key{}
+var ctxKey = keyType{}
+
+func WithUserInfo(ctx context.Context, info UserInfo) context.Context {
+	return context.WithValue(ctx, ctxKey, info)
+}
 
 func FromContext(ctx context.Context) (UserInfo, bool) {
 	v, ok := ctx.Value(ctxKey).(UserInfo)

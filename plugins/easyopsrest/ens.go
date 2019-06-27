@@ -1,6 +1,7 @@
 package easyopsrest
 
 import (
+	"fmt"
 	"github.com/easyops-cn/giraffe-micro"
 	"github.com/easyops-cn/giraffe-micro/plugins/easyopsrest/nameservice"
 	"strconv"
@@ -11,11 +12,15 @@ var DefaultNS = &ens{}
 
 type ens struct {}
 
-func (e *ens) GetAddress(contract giraffe.Contract) (*giraffe.Address, error) {
-	name := contract.Name()
-	if contract.Version() != "" {
-		name = name + "@" + contract.Version()
+func serviceName(method giraffe.Method) string {
+	if contract, ok := method.(giraffe.Contract); ok {
+		return fmt.Sprintf("%s@%s", contract.ContractName(), contract.ContractVersion())
 	}
+	return method.ServiceName()
+}
+
+func (e *ens) GetAddress(method giraffe.Method) (*giraffe.Address, error) {
+	name := serviceName(method)
 	ip, port, err := nameservice.GetServiceByName(name)
 	if err != nil {
 		return nil, err
@@ -27,11 +32,8 @@ func (e *ens) GetAddress(contract giraffe.Contract) (*giraffe.Address, error) {
 	}, nil
 }
 
-func (e *ens) GetAllAddresses(contract giraffe.Contract) ([]giraffe.Address, error) {
-	name := contract.Name()
-	if contract.Version() != "" {
-		name = name + "@" + contract.Version()
-	}
+func (e *ens) GetAllAddresses(method giraffe.Method) ([]giraffe.Address, error) {
+	name := serviceName(method)
 	strs, err := nameservice.GetAllServiceByName(name)
 	if err != nil {
 		return nil, err

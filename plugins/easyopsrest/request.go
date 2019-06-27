@@ -11,37 +11,11 @@ import (
 	"io"
 	"net/http"
 	"reflect"
-	"regexp"
 	"strconv"
 	"strings"
 )
 
 var jsonpbMarshaler = jsonpb.Marshaler{OrigName: true}
-
-type httpRule struct {
-	method string
-	path string
-	body string
-}
-
-func getHTTPRule(contract giraffe.Contract) (*httpRule, error) {
-	rule := &httpRule{
-		method: "GET",
-		path:   fmt.Sprintf("/%s/%s", contract.Desc().ServiceName, contract.Desc().MethodName),
-	}
-	if pattern, ok := contract.Desc().MetaData["url_pattern"]; ok {
-		match := regexp.MustCompile(`^(\w+)\s+((((/:)|(/))[\w]+)+|/)$`).FindStringSubmatch(pattern.(string))
-		if match == nil {
-			return nil, fmt.Errorf("not valid url format: %s", pattern)
-		}
-		rule.method = strings.ToUpper(match[1])
-		rule.path = match[2]
-	}
-	if body, ok := contract.Desc().MetaData["data_field"]; ok {
-		rule.body = body.(string)
-	}
-	return rule, nil
-}
 
 func isProtoMessage(v interface{}) (proto.Message, bool) {
 	rv := reflect.ValueOf(v)
@@ -56,9 +30,9 @@ func isProtoMessage(v interface{}) (proto.Message, bool) {
 	return nil, false
 }
 
-func NewRequest(contract giraffe.Contract, in interface{}) (*http.Request, error) {
+func NewRequest(method giraffe.Method, in interface{}) (*http.Request, error) {
 	if pb, yes := isProtoMessage(in); yes {
-		return newRequest(contract, pb)
+		return newRequest(method, pb)
 	}
 	return nil, errors.New("func NewRequest called with not proto.Message")
 }
@@ -99,22 +73,23 @@ func fieldProperties(f reflect.StructField) *proto.Properties {
 	return &prop
 }
 
-func newRequest(contract giraffe.Contract, pb proto.Message) (*http.Request, error) {
-	rule, err := getHTTPRule(contract)
-	if err != nil {
-		return nil, err
+func newRequest(method giraffe.Method, pb proto.Message) (*http.Request, error) {
+	rule, ok := method.(giraffe.HttpRule)
+	if !ok {
+		return nil, fmt.Errorf("")
 	}
 
-	url, err := urlpb.ParseURL(rule.path, pb, rule.method == "GET" || rule.method == "DELETE")
+	verb, path := rule.Pattern()
+	url, err := urlpb.ParseURL(path, pb, verb == "GET" || verb == "DELETE")
 	if err != nil {
 		return nil, err
 	}
 
 	var reader io.Reader
 	switch {
-	case rule.body != "":
+	case rule.Body() != "":
 		out := new(bytes.Buffer)
-		if err := marshalDataField(out, rule.body, pb); err != nil {
+		if err := marshalDataField(out, rule.Body(), pb); err != nil {
 			return nil, err
 		}
 		reader = bytes.NewReader(out.Bytes())
@@ -127,7 +102,7 @@ func newRequest(contract giraffe.Contract, pb proto.Message) (*http.Request, err
 	}
 
 
-	request, err := http.NewRequest(rule.method, url.String(), reader)
+	request, err := http.NewRequest(verb, url.String(), reader)
 	if err != nil {
 		return nil, err
 	}

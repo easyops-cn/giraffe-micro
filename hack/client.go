@@ -10,25 +10,30 @@ type clientWithServiceName struct {
 	serviceName string
 }
 
-type contractWithServiceName struct {
+type methodWithServiceName struct {
 	serviceName string
-	giraffe.Contract
+	giraffe.Method
 }
 
-func (c *contractWithServiceName) Name() string {
+func (c *methodWithServiceName) ServiceName() string {
 	return c.serviceName
 }
 
-func (c *contractWithServiceName) Version() string {
-	return ""
+type streamMethodWithServiceName struct {
+	serviceName string
+	giraffe.StreamMethod
 }
 
-func (c *clientWithServiceName) Invoke(ctx context.Context, contract giraffe.Contract, in interface{}, out interface{}) error {
-	return c.c.Invoke(ctx, &contractWithServiceName{c.serviceName, contract}, in, out)
+func (c *streamMethodWithServiceName) ServiceName() string {
+	return c.serviceName
 }
 
-func (c *clientWithServiceName) NewStream(ctx context.Context, contract giraffe.Contract) (giraffe.ClientStream, error) {
-	return c.c.NewStream(ctx, &contractWithServiceName{c.serviceName, contract})
+func (c *clientWithServiceName) Invoke(ctx context.Context, method giraffe.Method, in interface{}, out interface{}) error {
+	return c.c.Invoke(ctx, &methodWithServiceName{c.serviceName, method}, in, out)
+}
+
+func (c *clientWithServiceName) NewStream(ctx context.Context, method giraffe.StreamMethod) (giraffe.ClientStream, error) {
+	return c.c.NewStream(ctx, &streamMethodWithServiceName{c.serviceName, method})
 }
 
 func ClientWithServiceName(serviceName string, c giraffe.Client) *clientWithServiceName {

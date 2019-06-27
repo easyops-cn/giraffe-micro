@@ -9,28 +9,20 @@ type staticNameService struct {
 	Port int
 }
 
-func (n *staticNameService) GetAddress(contract giraffe.Contract) (*giraffe.Address, error) {
-	name := contract.Name()
-	if contract.Version() != "" {
-		name  = name + "@" + contract.Version()
-	}
+func (n *staticNameService) GetAddress(method giraffe.Method) (*giraffe.Address, error) {
 	return &giraffe.Address{
 		Host: n.Host,
 		Port: n.Port,
-		Name: name,
+		Name: method.ServiceName(),
 	}, nil
 }
 
-func (n *staticNameService) GetAllAddresses(contract giraffe.Contract) ([]giraffe.Address, error) {
-	name := contract.Name()
-	if contract.Version() != "" {
-		name  = name + "@" + contract.Version()
-	}
+func (n *staticNameService) GetAllAddresses(method giraffe.Method) ([]giraffe.Address, error) {
 	return []giraffe.Address{
 		{
 			Host: n.Host,
 			Port: n.Port,
-			Name: name,
+			Name: method.ServiceName(),
 		},
 	}, nil
 }

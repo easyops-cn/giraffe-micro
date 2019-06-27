@@ -15,14 +15,14 @@ type client struct {
 	options ClientOptions
 }
 
-func (c *client) Invoke(ctx context.Context, contract giraffe.Contract, in interface{}, out interface{}) error {
-	request, err := NewRequest(contract, in)
+func (c *client) Invoke(ctx context.Context, method giraffe.Method, in interface{}, out interface{}) error {
+	request, err := NewRequest(method, in)
 	if err != nil {
 		return err
 	}
-	request.WithContext(ctx)
+	request = request.WithContext(ctx)
 
-	addr, err := c.options.nameService.GetAddress(contract)
+	addr, err := c.options.nameService.GetAddress(method)
 	if err != nil {
 		return err
 	}
@@ -39,7 +39,7 @@ func (c *client) Invoke(ctx context.Context, contract giraffe.Contract, in inter
 	return nil
 }
 
-func (c *client) NewStream(ctx context.Context, contract giraffe.Contract) (giraffe.ClientStream, error) {
+func (c *client) NewStream(ctx context.Context, method giraffe.StreamMethod) (giraffe.ClientStream, error) {
 	return nil, errors.New("not supported")
 }
 
