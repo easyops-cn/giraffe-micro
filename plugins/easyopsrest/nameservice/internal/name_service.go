@@ -4,12 +4,9 @@
 package internal
 
 import (
-	"unsafe"
-)
-
-import (
 	"errors"
 	"fmt"
+	"unsafe"
 )
 
 // #cgo amd64 darwin LDFLAGS: -L. -lens_sdk

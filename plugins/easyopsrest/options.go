@@ -4,8 +4,9 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/easyops-cn/giraffe-micro"
 	"github.com/openzipkin/zipkin-go"
+
+	"github.com/easyops-cn/giraffe-micro"
 )
 
 type ClientOptions struct {

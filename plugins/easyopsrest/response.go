@@ -6,10 +6,11 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/easyops-cn/giraffe-micro/gerr"
-	"github.com/easyops-cn/giraffe-micro/status"
 	"github.com/gogo/protobuf/jsonpb"
 	"github.com/gogo/protobuf/proto"
+
+	"github.com/easyops-cn/giraffe-micro/gerr"
+	"github.com/easyops-cn/giraffe-micro/status"
 )
 
 type responseBody struct {

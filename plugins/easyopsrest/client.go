@@ -5,10 +5,11 @@ import (
 	"errors"
 	"net/http"
 
+	zipkinhttp "github.com/openzipkin/zipkin-go/middleware/http"
+
 	"github.com/easyops-cn/giraffe-micro"
 	"github.com/easyops-cn/giraffe-micro/gerr"
 	"github.com/easyops-cn/giraffe-micro/plugins/easyopsrest/auth"
-	zipkinhttp "github.com/openzipkin/zipkin-go/middleware/http"
 )
 
 type client struct {
