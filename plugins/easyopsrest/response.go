@@ -3,19 +3,20 @@ package easyopsrest
 import (
 	"bytes"
 	"encoding/json"
+	"io/ioutil"
+	"net/http"
+
 	"github.com/easyops-cn/giraffe-micro/gerr"
 	"github.com/easyops-cn/giraffe-micro/status"
 	"github.com/gogo/protobuf/jsonpb"
 	"github.com/gogo/protobuf/proto"
-	"io/ioutil"
-	"net/http"
 )
 
 type responseBody struct {
-	Code    int             `json:"code"`
-	CodeExplain string      `json:"codeExplain"`
-	Error   string          `json:"error"`
-	Data    json.RawMessage `json:"data"`
+	Code        int             `json:"code"`
+	CodeExplain string          `json:"codeExplain"`
+	Error       string          `json:"error"`
+	Data        json.RawMessage `json:"data"`
 }
 
 func parseResponse(resp *http.Response, out interface{}) error {
@@ -32,8 +33,8 @@ func parseResponse(resp *http.Response, out interface{}) error {
 	// 错误码不为0, 返回标准错误
 	if body.Code != 0 {
 		return gerr.FromProto(&status.Status{
-			Code: status.Code(body.Code),
-			Error: body.CodeExplain,
+			Code:    status.Code(body.Code),
+			Error:   body.CodeExplain,
 			Message: body.Error,
 			//TODO 增加错误data
 		})

@@ -18,11 +18,11 @@ import (
 import "C"
 
 const (
-	IP_LEN     = 16
-	MAX_IP_NUM = 8
+	IP_LEN              = 16
+	MAX_IP_NUM          = 8
 	MAX_LICENSE_KEY_NUM = 16
-	LICENSE_KEY_LEN = 32
-	LICENSE_VAL_LEN = 512
+	LICENSE_KEY_LEN     = 32
+	LICENSE_VAL_LEN     = 512
 )
 
 var appName string

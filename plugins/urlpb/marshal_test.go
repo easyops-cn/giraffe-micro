@@ -83,8 +83,8 @@ func TestMarshal(t *testing.T) {
 
 func TestParseURL(t *testing.T) {
 	type args struct {
-		rawurl    string
-		pb        proto.Message
+		rawurl     string
+		pb         proto.Message
 		parseQuery bool
 	}
 	tests := []struct {
@@ -96,81 +96,81 @@ func TestParseURL(t *testing.T) {
 		{
 			name: "TestHappyPath",
 			args: args{
-				rawurl: "http://127.0.0.1:8080/string/:string_value/bool/:bool_value?a=123",
-				pb: queryData,
+				rawurl:     "http://127.0.0.1:8080/string/:string_value/bool/:bool_value?a=123",
+				pb:         queryData,
 				parseQuery: true,
 			},
-			want: "http://127.0.0.1:8080/string/abc/bool/true?a=123&double_value=1.01&float_value=1&int32_value=-123&int64_value=-456&slice_value=a&slice_value=b&slice_value=c&uint32_value=789&uint64_value=10",
+			want:    "http://127.0.0.1:8080/string/abc/bool/true?a=123&double_value=1.01&float_value=1&int32_value=-123&int64_value=-456&slice_value=a&slice_value=b&slice_value=c&uint32_value=789&uint64_value=10",
 			wantErr: false,
 		},
 		{
 			name: "TestWithNoQueryParam",
 			args: args{
-				rawurl: "http://127.0.0.1:8080/string/:string_value/bool/:bool_value",
-				pb: queryData,
+				rawurl:     "http://127.0.0.1:8080/string/:string_value/bool/:bool_value",
+				pb:         queryData,
 				parseQuery: true,
 			},
-			want: "http://127.0.0.1:8080/string/abc/bool/true?double_value=1.01&float_value=1&int32_value=-123&int64_value=-456&slice_value=a&slice_value=b&slice_value=c&uint32_value=789&uint64_value=10",
+			want:    "http://127.0.0.1:8080/string/abc/bool/true?double_value=1.01&float_value=1&int32_value=-123&int64_value=-456&slice_value=a&slice_value=b&slice_value=c&uint32_value=789&uint64_value=10",
 			wantErr: false,
 		},
 		{
 			name: "TestWithoutParseQuery",
 			args: args{
-				rawurl: "http://127.0.0.1:8080/string/:string_value/bool/:bool_value?a=123",
-				pb: queryData,
+				rawurl:     "http://127.0.0.1:8080/string/:string_value/bool/:bool_value?a=123",
+				pb:         queryData,
 				parseQuery: false,
 			},
-			want: "http://127.0.0.1:8080/string/abc/bool/true?a=123",
+			want:    "http://127.0.0.1:8080/string/abc/bool/true?a=123",
 			wantErr: false,
 		},
 		{
 			name: "TestNormalURLWithoutParseQuery",
 			args: args{
-				rawurl: "http://127.0.0.1:8080/string/abc/bool/true?a=123",
-				pb: queryData,
+				rawurl:     "http://127.0.0.1:8080/string/abc/bool/true?a=123",
+				pb:         queryData,
 				parseQuery: false,
 			},
-			want: "http://127.0.0.1:8080/string/abc/bool/true?a=123",
+			want:    "http://127.0.0.1:8080/string/abc/bool/true?a=123",
 			wantErr: false,
 		},
 		{
 			name: "TestWithWrongURLParams",
 			args: args{
-				rawurl: "http://127.0.0.1:8080/string/:wrong_param/bool/:bool_value?a=123",
-				pb: queryData,
+				rawurl:     "http://127.0.0.1:8080/string/:wrong_param/bool/:bool_value?a=123",
+				pb:         queryData,
 				parseQuery: true,
 			},
-			want: "http://127.0.0.1:8080/string//bool/true?a=123&double_value=1.01&float_value=1&int32_value=-123&int64_value=-456&slice_value=a&slice_value=b&slice_value=c&string_value=abc&uint32_value=789&uint64_value=10",
+			want:    "http://127.0.0.1:8080/string//bool/true?a=123&double_value=1.01&float_value=1&int32_value=-123&int64_value=-456&slice_value=a&slice_value=b&slice_value=c&string_value=abc&uint32_value=789&uint64_value=10",
 			wantErr: false,
 		},
 		{
 			name: "TestWithWrongURL",
 			args: args{
-				rawurl: ":wrong url",
-				pb: queryData,
+				rawurl:     ":wrong url",
+				pb:         queryData,
 				parseQuery: true,
 			},
-			want: "<nil>",
+			want:    "<nil>",
 			wantErr: true,
 		},
 		{
 			name: "TestWithNilProtoMessage",
 			args: args{
-				rawurl: "http://127.0.0.1:8080/string/abc/bool/true?a=123",
-				pb: (*mock.Query)(nil),
+				rawurl:     "http://127.0.0.1:8080/string/abc/bool/true?a=123",
+				pb:         (*mock.Query)(nil),
 				parseQuery: true,
 			},
-			want: "<nil>",
+			want:    "<nil>",
 			wantErr: true,
 		},
 		{
 			name: "TestWithoutURLParams",
 			args: args{
-				rawurl: "http://127.0.0.1:8080/string/abc/bool/true?a=123",
-				pb: queryData,
+				rawurl:     "http://127.0.0.1:8080/string/abc/bool/true?a=123",
+				pb:         queryData,
 				parseQuery: true,
 			},
-			want: "http://127.0.0.1:8080/string/abc/bool/true?a=123&bool_value=true&double_value=1.01&float_value=1&int32_value=-123&int64_value=-456&slice_value=a&slice_value=b&slice_value=c&string_value=abc&uint32_value=789&uint64_value=10",
+			want:    "http://127.0.0.1:8080/string/abc/bool/true?a=123&bool_value=true&double_value=1.01&float_value=1&int32_value=-123&int64_value=-456&slice_value=a&slice_value=b&slice_value=c&string_value=abc&uint32_value=789&uint64_value=10",
 			wantErr: false,
 		},
 	}

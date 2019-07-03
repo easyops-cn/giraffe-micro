@@ -4,15 +4,18 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+
 	"github.com/easyops-cn/giraffe-micro"
 	"github.com/easyops-cn/giraffe-micro/plugins/urlpb"
-	"github.com/gogo/protobuf/jsonpb"
-	"github.com/gogo/protobuf/proto"
+
 	"io"
 	"net/http"
 	"reflect"
 	"strconv"
 	"strings"
+
+	"github.com/gogo/protobuf/jsonpb"
+	"github.com/gogo/protobuf/proto"
 )
 
 var jsonpbMarshaler = jsonpb.Marshaler{OrigName: true}
@@ -100,7 +103,6 @@ func newRequest(method giraffe.Method, pb proto.Message) (*http.Request, error) 
 		}
 		reader = bytes.NewReader(out.Bytes())
 	}
-
 
 	request, err := http.NewRequest(verb, url.String(), reader)
 	if err != nil {

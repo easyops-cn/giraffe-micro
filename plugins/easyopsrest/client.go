@@ -3,15 +3,16 @@ package easyopsrest
 import (
 	"context"
 	"errors"
+	"net/http"
+
 	"github.com/easyops-cn/giraffe-micro"
 	"github.com/easyops-cn/giraffe-micro/gerr"
 	"github.com/easyops-cn/giraffe-micro/plugins/easyopsrest/auth"
 	zipkinhttp "github.com/openzipkin/zipkin-go/middleware/http"
-	"net/http"
 )
 
 type client struct {
-	c *http.Client
+	c       *http.Client
 	options ClientOptions
 }
 
@@ -65,4 +66,3 @@ func NewClient(opts ...ClientOption) (giraffe.Client, error) {
 
 	return c, nil
 }
-

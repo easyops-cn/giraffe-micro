@@ -2,15 +2,16 @@ package easyopsrest
 
 import (
 	"fmt"
-	"github.com/easyops-cn/giraffe-micro"
-	"github.com/easyops-cn/giraffe-micro/plugins/easyopsrest/nameservice"
 	"strconv"
 	"strings"
+
+	"github.com/easyops-cn/giraffe-micro"
+	"github.com/easyops-cn/giraffe-micro/plugins/easyopsrest/nameservice"
 )
 
 var DefaultNS = &ens{}
 
-type ens struct {}
+type ens struct{}
 
 func serviceName(method giraffe.Method) string {
 	if contract, ok := method.(giraffe.Contract); ok {

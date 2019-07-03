@@ -17,7 +17,7 @@ import (
 )
 
 const (
-	envMockJson = "EASYOPS_NAME_SERVICE_MOCK"
+	envMockJson    = "EASYOPS_NAME_SERVICE_MOCK"
 	envMockLicense = "EASYOPS_LICENSE_MOCK"
 )
 

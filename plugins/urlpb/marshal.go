@@ -3,11 +3,12 @@ package urlpb
 import (
 	"errors"
 	"fmt"
-	"github.com/gogo/protobuf/proto"
 	"net/url"
 	"reflect"
 	"regexp"
 	"strings"
+
+	"github.com/gogo/protobuf/proto"
 )
 
 type query struct {

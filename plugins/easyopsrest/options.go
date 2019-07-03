@@ -1,17 +1,18 @@
 package easyopsrest
 
 import (
-	"github.com/easyops-cn/giraffe-micro"
-	"github.com/openzipkin/zipkin-go"
 	"net/http"
 	"time"
+
+	"github.com/easyops-cn/giraffe-micro"
+	"github.com/openzipkin/zipkin-go"
 )
 
 type ClientOptions struct {
 	nameService giraffe.NameService
-	timeout time.Duration
-	tracer *zipkin.Tracer
-	rt http.RoundTripper
+	timeout     time.Duration
+	tracer      *zipkin.Tracer
+	rt          http.RoundTripper
 }
 
 type ClientOption func(o *ClientOptions)
@@ -19,9 +20,9 @@ type ClientOption func(o *ClientOptions)
 func newClientOptions(opts ...ClientOption) ClientOptions {
 	opt := ClientOptions{
 		nameService: DefaultNS,
-		timeout: time.Second * 60,
-		tracer: nil,
-		rt: http.DefaultTransport,
+		timeout:     time.Second * 60,
+		tracer:      nil,
+		rt:          http.DefaultTransport,
 	}
 
 	for _, o := range opts {

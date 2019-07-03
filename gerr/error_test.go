@@ -2,11 +2,11 @@ package gerr
 
 import (
 	"fmt"
-	"github.com/easyops-cn/giraffe-micro"
-	"github.com/easyops-cn/giraffe-micro/status"
 	"reflect"
 	"testing"
 
+	"github.com/easyops-cn/giraffe-micro"
+	"github.com/easyops-cn/giraffe-micro/status"
 )
 
 func Test_newErrorf(t *testing.T) {

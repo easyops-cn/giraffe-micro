@@ -2,6 +2,7 @@ package hack
 
 import (
 	"context"
+
 	"github.com/easyops-cn/giraffe-micro"
 )
 
@@ -38,7 +39,7 @@ func (c *clientWithServiceName) NewStream(ctx context.Context, method giraffe.St
 
 func ClientWithServiceName(serviceName string, c giraffe.Client) *clientWithServiceName {
 	return &clientWithServiceName{
-		c: c,
+		c:           c,
 		serviceName: serviceName,
 	}
 }

@@ -1,8 +1,9 @@
 package nameservice_test
 
 import (
-	"github.com/easyops-cn/giraffe-micro/plugins/easyopsrest/nameservice"
 	"testing"
+
+	"github.com/easyops-cn/giraffe-micro/plugins/easyopsrest/nameservice"
 )
 
 func TestSetAppName(t *testing.T) {
