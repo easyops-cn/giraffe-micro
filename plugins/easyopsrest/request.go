@@ -78,7 +78,7 @@ func fieldProperties(f reflect.StructField) *proto.Properties {
 func newRequest(method giraffe.Method, pb proto.Message) (*http.Request, error) {
 	rule, ok := method.(giraffe.HttpRule)
 	if !ok {
-		return nil, fmt.Errorf("")
+		return nil, errors.New("method was not implement giraffe.HttpRule")
 	}
 
 	verb, path := rule.Pattern()
