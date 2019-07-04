@@ -8,38 +8,51 @@ import (
 
 type clientWithServiceName struct {
 	c           giraffe.Client
+	contract    giraffe.Contract
+}
+
+type contractWithServiceName struct {
 	serviceName string
 }
 
-type methodWithServiceName struct {
-	serviceName string
+func (c *contractWithServiceName) ContractName() string {
+	return c.serviceName
+}
+
+func (c *contractWithServiceName) ContractVersion() string {
+	return ""
+}
+
+type unaryMethod struct {
+	giraffe.Contract
 	giraffe.Method
 }
 
-func (c *methodWithServiceName) ServiceName() string {
-	return c.serviceName
+type httpMethod struct {
+	giraffe.Contract
+	giraffe.Method
+	giraffe.HttpRule
 }
 
-type streamMethodWithServiceName struct {
-	serviceName string
+type streamMethod struct {
+	giraffe.Contract
 	giraffe.StreamMethod
 }
 
-func (c *streamMethodWithServiceName) ServiceName() string {
-	return c.serviceName
-}
-
 func (c *clientWithServiceName) Invoke(ctx context.Context, method giraffe.Method, in interface{}, out interface{}) error {
-	return c.c.Invoke(ctx, &methodWithServiceName{c.serviceName, method}, in, out)
+	if httpRule, ok := method.(giraffe.HttpRule); ok {
+		return c.c.Invoke(ctx, &httpMethod{c.contract, method, httpRule}, in, out)
+	}
+	return c.c.Invoke(ctx, &unaryMethod{c.contract, method}, in, out)
 }
 
 func (c *clientWithServiceName) NewStream(ctx context.Context, method giraffe.StreamMethod) (giraffe.ClientStream, error) {
-	return c.c.NewStream(ctx, &streamMethodWithServiceName{c.serviceName, method})
+	return c.c.NewStream(ctx, &streamMethod{c.contract, method})
 }
 
-func ClientWithServiceName(serviceName string, c giraffe.Client) *clientWithServiceName {
+func ClientWithServiceName(serviceName string, c giraffe.Client) giraffe.Client {
 	return &clientWithServiceName{
 		c:           c,
-		serviceName: serviceName,
+		contract: &contractWithServiceName{serviceName:serviceName},
 	}
 }
