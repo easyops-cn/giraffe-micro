@@ -1,7 +1,6 @@
 package easyopsrest
 
 import (
-	"fmt"
 	"strconv"
 	"strings"
 
@@ -14,8 +13,12 @@ var DefaultNS = &ens{}
 type ens struct{}
 
 func serviceName(method giraffe.Method) string {
-	if contract, ok := method.(giraffe.Contract); ok {
-		return fmt.Sprintf("%s@%s", contract.ContractName(), contract.ContractVersion())
+	if contract, ok := method.(giraffe.Contract); ok && contract.ContractName() != "" {
+		a := []string{contract.ContractName()}
+		if contract.ContractVersion() != "" {
+			a = append(a, contract.ContractVersion())
+		}
+		return strings.Join(a, "@")
 	}
 	return method.ServiceName()
 }
