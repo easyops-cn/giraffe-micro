@@ -95,12 +95,14 @@ func newRequest(method giraffe.Method, pb proto.Message) (*http.Request, error) 
 			return nil, err
 		}
 		reader = bytes.NewReader(out.Bytes())
-	default:
+	case verb != "GET" && verb != "DELETE":
 		out := new(bytes.Buffer)
 		if err := jsonpbMarshaler.Marshal(out, pb); err != nil {
 			return nil, err
 		}
 		reader = bytes.NewReader(out.Bytes())
+	default:
+		reader = nil
 	}
 
 	request, err := http.NewRequest(verb, url.String(), reader)
