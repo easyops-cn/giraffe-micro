@@ -13,6 +13,6 @@ func (a *Address) String() string {
 }
 
 type NameService interface {
-	GetAddress(method Method) (*Address, error)
-	GetAllAddresses(method Method) ([]Address, error)
+	GetAddress(contract Contract) (*Address, error)
+	GetAllAddresses(contract Contract) ([]Address, error)
 }

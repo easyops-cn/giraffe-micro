@@ -21,6 +21,7 @@ type Client interface {
 }
 
 type Method interface {
+	Contract
 	ServiceName() string
 	MethodName() string
 	RequestMessage() interface{}  // for gRPC handler transform

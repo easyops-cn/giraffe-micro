@@ -12,19 +12,16 @@ var DefaultNS = &ens{}
 
 type ens struct{}
 
-func serviceName(method giraffe.Method) string {
-	if contract, ok := method.(giraffe.Contract); ok && contract.ContractName() != "" {
-		a := []string{contract.ContractName()}
-		if contract.ContractVersion() != "" {
-			a = append(a, contract.ContractVersion())
-		}
-		return strings.Join(a, "@")
+func serviceName(contract giraffe.Contract) string {
+	serviceName := contract.ContractName()
+	if contract.ContractVersion() != "" {
+		serviceName += contract.ContractVersion()
 	}
-	return method.ServiceName()
+	return serviceName
 }
 
-func (e *ens) GetAddress(method giraffe.Method) (*giraffe.Address, error) {
-	name := serviceName(method)
+func (e *ens) GetAddress(contract giraffe.Contract) (*giraffe.Address, error) {
+	name := serviceName(contract)
 	ip, port, err := nameservice.GetServiceByName(name)
 	if err != nil {
 		return nil, err
@@ -36,8 +33,8 @@ func (e *ens) GetAddress(method giraffe.Method) (*giraffe.Address, error) {
 	}, nil
 }
 
-func (e *ens) GetAllAddresses(method giraffe.Method) ([]giraffe.Address, error) {
-	name := serviceName(method)
+func (e *ens) GetAllAddresses(contract giraffe.Contract) ([]giraffe.Address, error) {
+	name := serviceName(contract)
 	strs, err := nameservice.GetAllServiceByName(name)
 	if err != nil {
 		return nil, err
