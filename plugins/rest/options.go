@@ -1,4 +1,4 @@
-package easyopsrest
+package rest
 
 import (
 	"net/http"
@@ -20,10 +20,9 @@ type ClientOption func(o *ClientOptions)
 
 func newClientOptions(opts ...ClientOption) ClientOptions {
 	opt := ClientOptions{
-		nameService: DefaultNS,
-		timeout:     time.Second * 60,
-		tracer:      nil,
-		rt:          http.DefaultTransport,
+		timeout: time.Second * 60,
+		tracer:  nil,
+		rt:      http.DefaultTransport,
 	}
 
 	for _, o := range opts {

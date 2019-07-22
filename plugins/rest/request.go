@@ -1,4 +1,4 @@
-package easyopsrest
+package rest
 
 import (
 	"bytes"
@@ -10,8 +10,10 @@ import (
 	"strconv"
 	"strings"
 
+	giraffeproto "github.com/easyops-cn/go-proto-giraffe"
+
 	"github.com/easyops-cn/giraffe-micro"
-	"github.com/easyops-cn/giraffe-micro/plugins/urlpb"
+	"github.com/easyops-cn/giraffe-micro/pkg/urlpb"
 
 	"github.com/gogo/protobuf/jsonpb"
 	"github.com/gogo/protobuf/proto"
@@ -30,13 +32,6 @@ func isProtoMessage(v interface{}) (proto.Message, bool) {
 		return pb, ok
 	}
 	return nil, false
-}
-
-func NewRequest(method giraffe.Method, in interface{}) (*http.Request, error) {
-	if pb, yes := isProtoMessage(in); yes {
-		return newRequest(method, pb)
-	}
-	return nil, errors.New("func NewRequest called with not proto.Message")
 }
 
 func marshalDataField(out io.Writer, name string, pb proto.Message) error {
@@ -75,27 +70,53 @@ func fieldProperties(f reflect.StructField) *proto.Properties {
 	return &prop
 }
 
-func newRequest(method giraffe.Method, pb proto.Message) (*http.Request, error) {
-	rule, ok := method.(giraffe.HttpRule)
-	if !ok {
-		return nil, errors.New("method was not implement giraffe.HttpRule")
+func getPattern(rule giraffe.HttpRule) (verb string, path string, err error) {
+	switch {
+	case rule.GetGet() != "":
+		return http.MethodGet, rule.GetGet(), nil
+	case rule.GetPost() != "":
+		return http.MethodPost, rule.GetPost(), nil
+	case rule.GetPut() != "":
+		return http.MethodPut, rule.GetPut(), nil
+	case rule.GetDelete() != "":
+		return http.MethodDelete, rule.GetDelete(), nil
+	case rule.GetPatch() != "":
+		return http.MethodPatch, rule.GetPatch(), nil
+	default:
+		if r, ok := rule.(interface{ GetCustom() *giraffeproto.CustomHttpPattern }); ok && r.GetCustom().GetPath() != "" {
+			return r.GetCustom().GetKind(), r.GetCustom().GetPath(), nil
+		}
+	}
+	return "", "", errors.New("http method was not defined")
+}
+
+func newRequest(md *giraffe.MethodDesc, in interface{}) (*http.Request, error) {
+	pb, _ := isProtoMessage(in)
+
+	rule := md.HttpRule
+	if rule == nil {
+		return nil, errors.New("http rule was nil")
 	}
 
-	verb, path := rule.Pattern()
-	url, err := urlpb.ParseURL(path, pb, verb == "GET" || verb == "DELETE")
+	verb, path, err := getPattern(rule)
+	if err != nil {
+		return nil, err
+	}
+
+	url, err := urlpb.ParseURL(path, pb, verb == http.MethodGet || verb == http.MethodDelete)
 	if err != nil {
 		return nil, err
 	}
 
 	var reader io.Reader
 	switch {
-	case rule.Body() != "":
+	case rule.GetBody() != "":
 		out := new(bytes.Buffer)
-		if err := marshalDataField(out, rule.Body(), pb); err != nil {
+		if err := marshalDataField(out, rule.GetBody(), pb); err != nil {
 			return nil, err
 		}
 		reader = bytes.NewReader(out.Bytes())
-	case verb != "GET" && verb != "DELETE":
+	case verb != http.MethodGet && verb != http.MethodDelete:
 		out := new(bytes.Buffer)
 		if err := jsonpbMarshaler.Marshal(out, pb); err != nil {
 			return nil, err

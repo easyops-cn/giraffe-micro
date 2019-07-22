@@ -1,4 +1,4 @@
-package easyopsrest
+package rest
 
 import (
 	"context"
@@ -8,40 +8,41 @@ import (
 	zipkinhttp "github.com/openzipkin/zipkin-go/middleware/http"
 
 	"github.com/easyops-cn/giraffe-micro"
-	"github.com/easyops-cn/giraffe-micro/gerr"
-	"github.com/easyops-cn/giraffe-micro/plugins/easyopsrest/auth"
 )
+
+// for unit testing convenient
+var zipkinTransportFactory = zipkinhttp.NewTransport
 
 type client struct {
 	c       *http.Client
 	options ClientOptions
 }
 
-func (c *client) Invoke(ctx context.Context, method giraffe.Method, in interface{}, out interface{}) error {
-	request, err := NewRequest(method, in)
+func (c *client) Invoke(ctx context.Context, md *giraffe.MethodDesc, in interface{}, out interface{}) error {
+	request, err := newRequest(md, in)
 	if err != nil {
 		return err
 	}
 	request = request.WithContext(ctx)
 
-	addr, err := c.options.nameService.GetAddress(method)
+	addr, err := c.options.nameService.GetAddress(md.Contract)
 	if err != nil {
 		return err
 	}
-	request.URL.Host = addr.String()
+	request.URL.Host = addr
 	request.URL.Scheme = "http"
 
 	response, err := c.c.Do(request)
 	if err != nil {
-		return gerr.UnknownErrorf("unexpected error %s when doing request", err.Error())
+		return err
 	}
-	if err := parseResponse(response, out); err != nil {
+	if err := parseResponse(md, response, out); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (c *client) NewStream(ctx context.Context, method giraffe.StreamMethod) (giraffe.ClientStream, error) {
+func (c *client) NewStream(ctx context.Context, sd *giraffe.StreamDesc) (giraffe.ClientStream, error) {
 	return nil, errors.New("not supported")
 }
 
@@ -55,15 +56,19 @@ func NewClient(opts ...ClientOption) (giraffe.Client, error) {
 		options: opt,
 	}
 
+	if opt.nameService == nil {
+		return nil, errors.New("nameservice should not be nil")
+	}
+
 	rt := opt.rt
 	if opt.tracer != nil {
-		t, err := zipkinhttp.NewTransport(opt.tracer, zipkinhttp.RoundTripper(opt.rt))
+		t, err := zipkinTransportFactory(opt.tracer, zipkinhttp.RoundTripper(opt.rt))
 		if err != nil {
 			return nil, err
 		}
 		rt = t
 	}
-	c.c.Transport = auth.NewTransport(auth.RoundTripper(rt))
+	c.c.Transport = rt
 
 	return c, nil
 }
