@@ -1,13 +1,17 @@
 package rest
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"net/http"
+	"net/http/httptest"
 	"reflect"
 	"testing"
 	"time"
 
+	giraffeproto "github.com/easyops-cn/go-proto-giraffe"
+	"github.com/gogo/protobuf/types"
 	"github.com/openzipkin/zipkin-go"
 	zipkinhttp "github.com/openzipkin/zipkin-go/middleware/http"
 
@@ -15,11 +19,12 @@ import (
 )
 
 type FakeNameService struct{}
-
 func (*FakeNameService) GetAddress(contract giraffe.Contract) (string, error) { return "", nil }
-func (*FakeNameService) GetAllAddresses(contract giraffe.Contract) ([]string, error) {
-	return []string{}, nil
-}
+func (*FakeNameService) GetAllAddresses(contract giraffe.Contract) ([]string, error) { return []string{}, nil }
+
+type ErrNameService struct {}
+func (*ErrNameService) GetAddress(contract giraffe.Contract) (string, error) { return "", errors.New("") }
+func (*ErrNameService) GetAllAddresses(contract giraffe.Contract) ([]string, error) { return []string{}, errors.New("") }
 
 var ns = &FakeNameService{}
 var tracer = &zipkin.Tracer{}
@@ -172,6 +177,32 @@ func Test_client_NewStream(t *testing.T) {
 	}
 }
 
+type statusOKTransport struct {}
+
+func (t *statusOKTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	rec := httptest.NewRecorder()
+	rec.Code = http.StatusOK
+	rec.Header().Add("Content-Type", "application/json")
+	rec.Body = bytes.NewBuffer([]byte("{}"))
+	return rec.Result(), nil
+}
+
+type statusNotFoundTransport struct {}
+
+func (t *statusNotFoundTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	rec := httptest.NewRecorder()
+	rec.Code = http.StatusNotFound
+	rec.Header().Add("Content-Type", "application/json")
+	rec.Body = bytes.NewBuffer([]byte("{}"))
+	return rec.Result(), nil
+}
+
+type failedTransport struct {}
+
+func (t *failedTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	return nil, errors.New("always error")
+}
+
 func Test_client_Invoke(t *testing.T) {
 	type fields struct {
 		c       *http.Client
@@ -189,17 +220,155 @@ func Test_client_Invoke(t *testing.T) {
 		args    args
 		wantErr bool
 	}{
-		//{
-		//	name: "Test_HappyPath",
-		//	fields: fields{
-		//		c: &http.Client{},
-		//		options: nil,
-		//	},
-		//	args: args{
-		//		ctx: context.Background(),
-		//		md: &giraffe.MethodDesc{},
-		//	},
-		//},
+		{
+			name: "Test_HappyPath",
+			fields: fields{
+				c: &http.Client{
+					Transport: &statusOKTransport{},
+				},
+				options: ClientOptions{
+					nameService: ns,
+				},
+			},
+			args: args{
+				ctx: context.Background(),
+				md: &giraffe.MethodDesc{
+					Contract: &giraffeproto.Contract{
+						Name: "easyops.api.cmdb.instance.GetDetail",
+						Version: "1.0",
+					},
+					ServiceName: "instance.rpc",
+					MethodName: "GetDetail",
+					HttpRule: &giraffeproto.HttpRule{
+						Pattern: &giraffeproto.HttpRule_Get{
+							Get: "/object/:objectId/instance/:instanceId",
+						},
+						Body: "",
+					},
+				},
+				in: &GetDetailRequest{},
+				out: &types.Struct{},
+			},
+			wantErr: false,
+		},
+		{
+			name: "Test_WithoutHttpRule",
+			fields: fields{
+				c: &http.Client{
+					Transport: &statusOKTransport{},
+				},
+				options: ClientOptions{
+					nameService: ns,
+				},
+			},
+			args: args{
+				ctx: context.Background(),
+				md: &giraffe.MethodDesc{
+					Contract: &giraffeproto.Contract{
+						Name: "easyops.api.cmdb.instance.GetDetail",
+						Version: "1.0",
+					},
+					ServiceName: "instance.rpc",
+					MethodName: "GetDetail",
+				},
+				in: &GetDetailRequest{},
+				out: &types.Struct{},
+			},
+			wantErr: true,
+		},
+		{
+			name: "Test_WhenNameServiceError",
+			fields: fields{
+				c: &http.Client{
+					Transport: &statusOKTransport{},
+				},
+				options: ClientOptions{
+					nameService: &ErrNameService{},
+				},
+			},
+			args: args{
+				ctx: context.Background(),
+				md: &giraffe.MethodDesc{
+					Contract: &giraffeproto.Contract{
+						Name: "easyops.api.cmdb.instance.GetDetail",
+						Version: "1.0",
+					},
+					ServiceName: "instance.rpc",
+					MethodName: "GetDetail",
+					HttpRule: &giraffeproto.HttpRule{
+						Pattern: &giraffeproto.HttpRule_Get{
+							Get: "/object/:objectId/instance/:instanceId",
+						},
+						Body: "",
+					},
+				},
+				in: &GetDetailRequest{},
+				out: &types.Struct{},
+			},
+			wantErr: true,
+		},
+		{
+			name: "Test_ErrorResponse",
+			fields: fields{
+				c: &http.Client{
+					Transport: &statusNotFoundTransport{},
+				},
+				options: ClientOptions{
+					nameService: ns,
+				},
+			},
+			args: args{
+				ctx: context.Background(),
+				md: &giraffe.MethodDesc{
+					Contract: &giraffeproto.Contract{
+						Name: "easyops.api.cmdb.instance.GetDetail",
+						Version: "1.0",
+					},
+					ServiceName: "instance.rpc",
+					MethodName: "GetDetail",
+					HttpRule: &giraffeproto.HttpRule{
+						Pattern: &giraffeproto.HttpRule_Get{
+							Get: "/object/:objectId/instance/:instanceId",
+						},
+						Body: "",
+					},
+				},
+				in: &GetDetailRequest{},
+				out: &types.Struct{},
+			},
+			wantErr: true,
+		},
+		{
+			name: "Test_RequestFailed",
+			fields: fields{
+				c: &http.Client{
+					Transport: &failedTransport{},
+				},
+				options: ClientOptions{
+					nameService: ns,
+				},
+			},
+			args: args{
+				ctx: context.Background(),
+				md: &giraffe.MethodDesc{
+					Contract: &giraffeproto.Contract{
+						Name: "easyops.api.cmdb.instance.GetDetail",
+						Version: "1.0",
+					},
+					ServiceName: "instance.rpc",
+					MethodName: "GetDetail",
+					HttpRule: &giraffeproto.HttpRule{
+						Pattern: &giraffeproto.HttpRule_Get{
+							Get: "/object/:objectId/instance/:instanceId",
+						},
+						Body: "",
+					},
+				},
+				in: &GetDetailRequest{},
+				out: &types.Struct{},
+			},
+			wantErr: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
