@@ -27,7 +27,7 @@ func (c *client) Init(opt ClientOptions) error {
 	c.c.Timeout = opt.Timeout
 	c.options = opt
 
-	if opt.NameService == nil {
+	if opt.ContractService == nil {
 		return errors.New("nameservice should not be nil")
 	}
 
@@ -51,7 +51,7 @@ func (c *client) Invoke(ctx context.Context, md *giraffe.MethodDesc, in interfac
 	}
 	request = request.WithContext(ctx)
 
-	addr, err := c.options.NameService.GetAddress(md.Contract)
+	addr, err := c.options.ContractService.GetAddress(md.Contract)
 	if err != nil {
 		return err
 	}
