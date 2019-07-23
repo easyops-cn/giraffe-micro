@@ -1,7 +1,10 @@
 syntax = "proto3";
 
-package status;
+package codes;
 
+// 统一定义的返回码
+// 参照 Google API Design Guide 设计
+// 出于接口兼容的考虑, 修改部分返回码值
 enum Code {
     // Not an error; returned on success
     //

@@ -1,4 +1,4 @@
-package easyopsrest
+package rest
 
 import (
 	"net/http"
@@ -10,20 +10,19 @@ import (
 )
 
 type ClientOptions struct {
-	nameService giraffe.NameService
-	timeout     time.Duration
-	tracer      *zipkin.Tracer
-	rt          http.RoundTripper
+	NameService giraffe.NameService
+	Timeout     time.Duration
+	Tracer      *zipkin.Tracer
+	Transport   http.RoundTripper
 }
 
 type ClientOption func(o *ClientOptions)
 
 func newClientOptions(opts ...ClientOption) ClientOptions {
 	opt := ClientOptions{
-		nameService: DefaultNS,
-		timeout:     time.Second * 60,
-		tracer:      nil,
-		rt:          http.DefaultTransport,
+		Timeout:   time.Second * 60,
+		Tracer:    nil,
+		Transport: http.DefaultTransport,
 	}
 
 	for _, o := range opts {
@@ -35,24 +34,24 @@ func newClientOptions(opts ...ClientOption) ClientOptions {
 
 func WithTimeout(timeout time.Duration) ClientOption {
 	return func(o *ClientOptions) {
-		o.timeout = timeout
+		o.Timeout = timeout
 	}
 }
 
 func WithNameService(ns giraffe.NameService) ClientOption {
 	return func(o *ClientOptions) {
-		o.nameService = ns
+		o.NameService = ns
 	}
 }
 
 func WithTracer(tracer *zipkin.Tracer) ClientOption {
 	return func(o *ClientOptions) {
-		o.tracer = tracer
+		o.Tracer = tracer
 	}
 }
 
 func WithRoundTripper(rt http.RoundTripper) ClientOption {
 	return func(o *ClientOptions) {
-		o.rt = rt
+		o.Transport = rt
 	}
 }

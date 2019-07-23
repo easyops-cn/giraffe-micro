@@ -3,7 +3,7 @@ package giraffe
 import (
 	"context"
 
-	"github.com/easyops-cn/giraffe-micro/status"
+	"github.com/easyops-cn/giraffe-micro/codes"
 )
 
 type UnaryEndpoint func(ctx context.Context, req interface{}) (interface{}, error)
@@ -11,43 +11,64 @@ type UnaryEndpoint func(ctx context.Context, req interface{}) (interface{}, erro
 type StreamEndpoint func(ctx context.Context, stream ServiceStream) error
 
 type Server interface {
-	RegisterUnaryEndpoint(method Method, handle UnaryEndpoint)
-	RegisterStreamEndpoint(method StreamMethod, handle StreamEndpoint)
+	RegisterUnaryEndpoint(md *MethodDesc, handle UnaryEndpoint)
+	RegisterStreamEndpoint(sd *StreamDesc, handle StreamEndpoint)
 }
 
 type Client interface {
-	Invoke(ctx context.Context, method Method, in interface{}, out interface{}) error
-	NewStream(ctx context.Context, method StreamMethod) (ClientStream, error)
+	Invoke(ctx context.Context, md *MethodDesc, in interface{}, out interface{}) error
+	NewStream(ctx context.Context, sd *StreamDesc) (ClientStream, error)
 }
 
-type Method interface {
-	Contract
-	ServiceName() string
-	MethodName() string
-	RequestMessage() interface{}  // for gRPC handler transform
-	ResponseMessage() interface{} // for gRPC handler transform
+type ClientStream interface {
+	SendMsg(m interface{}) error
+	RecvMsg(m interface{}) error
+	CloseSend() error
 }
 
-type StreamMethod interface {
-	Method
-	ClientStreams() bool
-	ServerStreams() bool
+type ServiceStream interface {
+	// TODO add support SetHeader() SendHeader() SetTrailer()
+	SendMsg(m interface{}) error
+	RecvMsg(m interface{}) error
+}
+
+type NameService interface {
+	GetAddress(contract Contract) (string, error)
+	GetAllAddresses(contract Contract) ([]string, error)
 }
 
 type Contract interface {
-	ContractName() string
-	ContractVersion() string
+	GetName() string
+	GetVersion() string
 }
 
 type HttpRule interface {
-	Pattern() (string, string)
-	Body() string
+	GetGet() string
+	GetPut() string
+	GetPost() string
+	GetDelete() string
+	GetPatch() string
+	GetBody() string
+	GetResponseBody() string
 }
 
-type Error interface {
-	Code() status.Code
-	Error() string
-	Message() string
-	WithMessage(message string) Error
-	Proto() *status.Status
+type StatusCode interface {
+	GiraffeStatusCode() codes.Code
+}
+
+type MethodDesc struct {
+	Contract     Contract
+	ServiceName  string
+	MethodName   string
+	RequestType  interface{}
+	ResponseType interface{}
+	HttpRule     HttpRule
+}
+
+type StreamDesc struct {
+	Contract      Contract
+	ServiceName   string
+	StreamName    string
+	ClientStreams bool
+	ServerStreams bool
 }
