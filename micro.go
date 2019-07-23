@@ -2,6 +2,8 @@ package giraffe
 
 import (
 	"context"
+
+	"github.com/easyops-cn/giraffe-micro/codes"
 )
 
 type UnaryEndpoint func(ctx context.Context, req interface{}) (interface{}, error)
@@ -48,6 +50,10 @@ type HttpRule interface {
 	GetPatch() string
 	GetBody() string
 	GetResponseBody() string
+}
+
+type StatusCode interface {
+	GiraffeStatusCode() codes.Code
 }
 
 type MethodDesc struct {
