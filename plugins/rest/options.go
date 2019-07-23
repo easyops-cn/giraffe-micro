@@ -10,7 +10,7 @@ import (
 )
 
 type ClientOptions struct {
-	NameService giraffe.ContractService
+	NameService giraffe.NameService
 	Timeout     time.Duration
 	Tracer      *zipkin.Tracer
 	Transport   http.RoundTripper
@@ -38,7 +38,7 @@ func WithTimeout(timeout time.Duration) ClientOption {
 	}
 }
 
-func WithNameService(ns giraffe.ContractService) ClientOption {
+func WithNameService(ns giraffe.NameService) ClientOption {
 	return func(o *ClientOptions) {
 		o.NameService = ns
 	}

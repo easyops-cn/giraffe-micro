@@ -32,7 +32,7 @@ type ServiceStream interface {
 	RecvMsg(m interface{}) error
 }
 
-type ContractService interface {
+type NameService interface {
 	GetAddress(contract Contract) (string, error)
 	GetAllAddresses(contract Contract) ([]string, error)
 }

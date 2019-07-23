@@ -13,17 +13,12 @@ import (
 // for unit testing convenient
 var zipkinTransportFactory = zipkinhttp.NewTransport
 
-type RESTClient interface {
-	giraffe.Client
-	Init(opt ClientOptions) error
-}
-
 type client struct {
 	c       *http.Client
 	options ClientOptions
 }
 
-func (c *client) Init(opt ClientOptions) error {
+func (c *client) init(opt ClientOptions) error {
 	c.c.Timeout = opt.Timeout
 	c.options = opt
 
@@ -72,14 +67,14 @@ func (c *client) NewStream(ctx context.Context, sd *giraffe.StreamDesc) (giraffe
 	return nil, errors.New("not supported")
 }
 
-func NewClient(opts ...ClientOption) (RESTClient, error) {
+func NewClient(opts ...ClientOption) (giraffe.Client, error) {
 	opt := newClientOptions(opts...)
 
 	c := &client{
 		c: &http.Client{},
 	}
 
-	if err := c.Init(opt); err != nil {
+	if err := c.init(opt); err != nil {
 		return nil, err
 	}
 
