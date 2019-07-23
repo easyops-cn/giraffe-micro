@@ -25,7 +25,7 @@ func (c *client) Invoke(ctx context.Context, md *giraffe.MethodDesc, in interfac
 	}
 	request = request.WithContext(ctx)
 
-	addr, err := c.options.nameService.GetAddress(md.Contract)
+	addr, err := c.options.NameService.GetAddress(md.Contract)
 	if err != nil {
 		return err
 	}
@@ -51,18 +51,18 @@ func NewClient(opts ...ClientOption) (giraffe.Client, error) {
 
 	c := &client{
 		c: &http.Client{
-			Timeout: opt.timeout,
+			Timeout: opt.Timeout,
 		},
 		options: opt,
 	}
 
-	if opt.nameService == nil {
+	if opt.NameService == nil {
 		return nil, errors.New("nameservice should not be nil")
 	}
 
-	rt := opt.rt
-	if opt.tracer != nil {
-		t, err := zipkinTransportFactory(opt.tracer, zipkinhttp.RoundTripper(opt.rt))
+	rt := opt.Transport
+	if opt.Tracer != nil {
+		t, err := zipkinTransportFactory(opt.Tracer, zipkinhttp.RoundTripper(opt.Transport))
 		if err != nil {
 			return nil, err
 		}

@@ -59,10 +59,10 @@ func TestNewClient(t *testing.T) {
 					}(),
 				},
 				options: ClientOptions{
-					nameService: ns,
-					tracer:      tracer,
-					timeout:     120 * time.Second,
-					rt:          transport,
+					NameService: ns,
+					Tracer:      tracer,
+					Timeout:     120 * time.Second,
+					Transport:   transport,
 				},
 			},
 			wantErr: false,
@@ -227,7 +227,7 @@ func Test_client_Invoke(t *testing.T) {
 					Transport: &statusOKTransport{},
 				},
 				options: ClientOptions{
-					nameService: ns,
+					NameService: ns,
 				},
 			},
 			args: args{
@@ -258,7 +258,7 @@ func Test_client_Invoke(t *testing.T) {
 					Transport: &statusOKTransport{},
 				},
 				options: ClientOptions{
-					nameService: ns,
+					NameService: ns,
 				},
 			},
 			args: args{
@@ -283,7 +283,7 @@ func Test_client_Invoke(t *testing.T) {
 					Transport: &statusOKTransport{},
 				},
 				options: ClientOptions{
-					nameService: &ErrNameService{},
+					NameService: &ErrNameService{},
 				},
 			},
 			args: args{
@@ -314,7 +314,7 @@ func Test_client_Invoke(t *testing.T) {
 					Transport: &statusNotFoundTransport{},
 				},
 				options: ClientOptions{
-					nameService: ns,
+					NameService: ns,
 				},
 			},
 			args: args{
@@ -345,7 +345,7 @@ func Test_client_Invoke(t *testing.T) {
 					Transport: &failedTransport{},
 				},
 				options: ClientOptions{
-					nameService: ns,
+					NameService: ns,
 				},
 			},
 			args: args{
