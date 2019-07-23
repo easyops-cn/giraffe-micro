@@ -26,7 +26,7 @@ type ErrNameService struct {}
 func (*ErrNameService) GetAddress(contract giraffe.Contract) (string, error) { return "", errors.New("") }
 func (*ErrNameService) GetAllAddresses(contract giraffe.Contract) ([]string, error) { return []string{}, errors.New("") }
 
-var cs = &FakeNameService{}
+var ns = &FakeNameService{}
 var tracer = &zipkin.Tracer{}
 var transport = &http.Transport{MaxIdleConns: 100}
 
@@ -45,7 +45,7 @@ func TestNewClient(t *testing.T) {
 			args: args{
 				opts: []ClientOption{
 					WithTimeout(120 * time.Second),
-					WithNameService(cs),
+					WithNameService(ns),
 					WithTracer(tracer),
 					WithRoundTripper(transport),
 				},
@@ -59,10 +59,10 @@ func TestNewClient(t *testing.T) {
 					}(),
 				},
 				options: ClientOptions{
-					ContractService: cs,
-					Tracer:          tracer,
-					Timeout:         120 * time.Second,
-					Transport:       transport,
+					NameService: ns,
+					Tracer:      tracer,
+					Timeout:     120 * time.Second,
+					Transport:   transport,
 				},
 			},
 			wantErr: false,
@@ -109,7 +109,7 @@ func TestNewClient2(t *testing.T) {
 			args: args{
 				opts: []ClientOption{
 					WithTimeout(120 * time.Second),
-					WithNameService(cs),
+					WithNameService(ns),
 					WithTracer(tracer),
 					WithRoundTripper(transport),
 				},
@@ -227,7 +227,7 @@ func Test_client_Invoke(t *testing.T) {
 					Transport: &statusOKTransport{},
 				},
 				options: ClientOptions{
-					ContractService: cs,
+					NameService: ns,
 				},
 			},
 			args: args{
@@ -258,7 +258,7 @@ func Test_client_Invoke(t *testing.T) {
 					Transport: &statusOKTransport{},
 				},
 				options: ClientOptions{
-					ContractService: cs,
+					NameService: ns,
 				},
 			},
 			args: args{
@@ -283,7 +283,7 @@ func Test_client_Invoke(t *testing.T) {
 					Transport: &statusOKTransport{},
 				},
 				options: ClientOptions{
-					ContractService: &ErrNameService{},
+					NameService: &ErrNameService{},
 				},
 			},
 			args: args{
@@ -314,7 +314,7 @@ func Test_client_Invoke(t *testing.T) {
 					Transport: &statusNotFoundTransport{},
 				},
 				options: ClientOptions{
-					ContractService: cs,
+					NameService: ns,
 				},
 			},
 			args: args{
@@ -345,7 +345,7 @@ func Test_client_Invoke(t *testing.T) {
 					Transport: &failedTransport{},
 				},
 				options: ClientOptions{
-					ContractService: cs,
+					NameService: ns,
 				},
 			},
 			args: args{
