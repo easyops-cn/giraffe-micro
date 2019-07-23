@@ -37,7 +37,7 @@ func TestNewClient(t *testing.T) {
 	tests := []struct {
 		name    string
 		args    args
-		want    giraffe.Client
+		want    RESTClient
 		wantErr bool
 	}{
 		{
@@ -101,7 +101,7 @@ func TestNewClient2(t *testing.T) {
 	tests := []struct {
 		name    string
 		args    args
-		want    giraffe.Client
+		want    RESTClient
 		wantErr bool
 	}{
 		{

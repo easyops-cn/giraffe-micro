@@ -13,9 +13,35 @@ import (
 // for unit testing convenient
 var zipkinTransportFactory = zipkinhttp.NewTransport
 
+type RESTClient interface {
+	giraffe.Client
+	Init(opt ClientOptions) error
+}
+
 type client struct {
 	c       *http.Client
 	options ClientOptions
+}
+
+func (c *client) Init(opt ClientOptions) error {
+	c.c.Timeout = opt.Timeout
+	c.options = opt
+
+	if opt.NameService == nil {
+		return errors.New("nameservice should not be nil")
+	}
+
+	rt := opt.Transport
+	if opt.Tracer != nil {
+		t, err := zipkinTransportFactory(opt.Tracer, zipkinhttp.RoundTripper(opt.Transport))
+		if err != nil {
+			return err
+		}
+		rt = t
+	}
+	c.c.Transport = rt
+
+	return nil
 }
 
 func (c *client) Invoke(ctx context.Context, md *giraffe.MethodDesc, in interface{}, out interface{}) error {
@@ -46,29 +72,16 @@ func (c *client) NewStream(ctx context.Context, sd *giraffe.StreamDesc) (giraffe
 	return nil, errors.New("not supported")
 }
 
-func NewClient(opts ...ClientOption) (giraffe.Client, error) {
+func NewClient(opts ...ClientOption) (RESTClient, error) {
 	opt := newClientOptions(opts...)
 
 	c := &client{
-		c: &http.Client{
-			Timeout: opt.Timeout,
-		},
-		options: opt,
+		c: &http.Client{},
 	}
 
-	if opt.NameService == nil {
-		return nil, errors.New("nameservice should not be nil")
+	if err := c.Init(opt); err != nil {
+		return nil, err
 	}
-
-	rt := opt.Transport
-	if opt.Tracer != nil {
-		t, err := zipkinTransportFactory(opt.Tracer, zipkinhttp.RoundTripper(opt.Transport))
-		if err != nil {
-			return nil, err
-		}
-		rt = t
-	}
-	c.c.Transport = rt
 
 	return c, nil
 }
