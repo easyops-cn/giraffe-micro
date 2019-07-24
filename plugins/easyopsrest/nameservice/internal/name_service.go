@@ -1,5 +1,6 @@
 // +build linux
 // +build !mock
+// +build !travis
 
 package internal
 

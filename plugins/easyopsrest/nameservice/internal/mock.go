@@ -1,4 +1,4 @@
-// +build mock windows darwin
+// +build mock windows darwin travis
 
 // mock 数据请自行从 go.easyops.local/nameservice/internal/mock.json 获取，
 // 将其中的 data 数据保存文件，并设置环境变量 `EASYOPS_NAME_SERVICE_MOCK` 为该文件路径。
