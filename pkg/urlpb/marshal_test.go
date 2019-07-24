@@ -8,7 +8,7 @@ import (
 
 	"github.com/gogo/protobuf/proto"
 
-	"github.com/easyops-cn/giraffe-micro/plugins/urlpb/mock"
+	"github.com/easyops-cn/giraffe-micro/pkg/urlpb/mock"
 )
 
 var queryData = &mock.Query{

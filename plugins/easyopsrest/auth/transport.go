@@ -20,18 +20,13 @@ func (t *transport) RoundTrip(r *http.Request) (*http.Response, error) {
 	return t.rt.RoundTrip(r)
 }
 
-func NewTransport(options ...TransportOption) http.RoundTripper {
-	t := &transport{
-		rt: http.DefaultTransport,
+func NewTransport(rt http.RoundTripper) http.RoundTripper {
+	if rt == nil {
+		return &transport{
+			rt: http.DefaultTransport,
+		}
 	}
-	for _, o := range options {
-		o(t)
-	}
-	return t
-}
-
-func RoundTripper(rt http.RoundTripper) TransportOption {
-	return func(t *transport) {
-		t.rt = rt
+	return &transport{
+		rt: rt,
 	}
 }

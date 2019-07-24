@@ -1,4 +1,4 @@
-package easyopsrest
+package rest
 
 import (
 	"net/http"
@@ -7,23 +7,19 @@ import (
 	"github.com/openzipkin/zipkin-go"
 
 	"github.com/easyops-cn/giraffe-micro"
+	"github.com/easyops-cn/giraffe-micro/plugins/easyopsrest/ens"
+	"github.com/easyops-cn/giraffe-micro/plugins/rest"
 )
 
-type ClientOptions struct {
-	nameService giraffe.NameService
-	timeout     time.Duration
-	tracer      *zipkin.Tracer
-	rt          http.RoundTripper
-}
+// Deprecated: Replace by go.easyops.local/giraffe-micro/v2/rest
+type ClientOption func(o *rest.ClientOptions)
 
-type ClientOption func(o *ClientOptions)
-
-func newClientOptions(opts ...ClientOption) ClientOptions {
-	opt := ClientOptions{
-		nameService: DefaultNS,
-		timeout:     time.Second * 60,
-		tracer:      nil,
-		rt:          http.DefaultTransport,
+func newClientOptions(opts ...ClientOption) rest.ClientOptions {
+	opt := rest.ClientOptions{
+		Timeout:     time.Second * 60,
+		Tracer:      nil,
+		NameService: ens.NewNameService(),
+		Transport:   http.DefaultTransport,
 	}
 
 	for _, o := range opts {
@@ -33,26 +29,30 @@ func newClientOptions(opts ...ClientOption) ClientOptions {
 	return opt
 }
 
+// Deprecated: Replace by go.easyops.local/giraffe-micro/v2/rest
 func WithTimeout(timeout time.Duration) ClientOption {
-	return func(o *ClientOptions) {
-		o.timeout = timeout
+	return func(o *rest.ClientOptions) {
+		o.Timeout = timeout
 	}
 }
 
+// Deprecated: Replace by go.easyops.local/giraffe-micro/v2/rest
 func WithNameService(ns giraffe.NameService) ClientOption {
-	return func(o *ClientOptions) {
-		o.nameService = ns
+	return func(o *rest.ClientOptions) {
+		o.NameService = ns
 	}
 }
 
+// Deprecated: Replace by go.easyops.local/giraffe-micro/v2/rest
 func WithTracer(tracer *zipkin.Tracer) ClientOption {
-	return func(o *ClientOptions) {
-		o.tracer = tracer
+	return func(o *rest.ClientOptions) {
+		o.Tracer = tracer
 	}
 }
 
+// Deprecated: Replace by go.easyops.local/giraffe-micro/v2/rest
 func WithRoundTripper(rt http.RoundTripper) ClientOption {
-	return func(o *ClientOptions) {
-		o.rt = rt
+	return func(o *rest.ClientOptions) {
+		o.Transport = rt
 	}
 }
