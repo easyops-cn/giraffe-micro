@@ -3,9 +3,9 @@ package urlpb
 import (
 	"fmt"
 	"net/url"
-	"reflect"
 	"testing"
 
+	"github.com/go-test/deep"
 	"github.com/gogo/protobuf/proto"
 
 	"github.com/easyops-cn/giraffe-micro/pkg/urlpb/mock"
@@ -75,8 +75,11 @@ func TestMarshal(t *testing.T) {
 				t.Errorf("Marshal() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Marshal() = %v, want %v", got, tt.want)
+			//if !reflect.DeepEqual(got, tt.want) {
+			//	t.Errorf("Marshal() = %v, want %v", got, tt.want)
+			//}
+			if diff := deep.Equal(got, tt.want); diff != nil {
+				t.Error(diff)
 			}
 		})
 	}
@@ -183,8 +186,11 @@ func TestParseURL(t *testing.T) {
 				return
 			}
 			gotString := fmt.Sprint(got)
-			if !reflect.DeepEqual(gotString, tt.want) {
-				t.Errorf("ParseURL() = %v, want %v", got, tt.want)
+			//if !reflect.DeepEqual(gotString, tt.want) {
+			//	t.Errorf("ParseURL() = %v, want %v", got, tt.want)
+			//}
+			if diff := deep.Equal(gotString, tt.want); diff != nil {
+				t.Error(diff)
 			}
 		})
 	}

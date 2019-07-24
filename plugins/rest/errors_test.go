@@ -3,8 +3,9 @@ package rest
 import (
 	"net/http"
 	"net/http/httptest"
-	"reflect"
 	"testing"
+
+	"github.com/go-test/deep"
 )
 
 var resp200 = (&httptest.ResponseRecorder{Code: http.StatusOK}).Result()
@@ -24,8 +25,12 @@ func Test_restError_Error(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := tt.r.Error(); got != tt.want {
-				t.Errorf("restError.Error() = %v, want %v", got, tt.want)
+			//if got := tt.r.Error(); got != tt.want {
+			//	t.Errorf("restError.Error() = %v, want %v", got, tt.want)
+			//}
+			got := tt.r.Error();
+			if diff := deep.Equal(got, tt.want); diff != nil {
+				t.Error(diff)
 			}
 		})
 	}
@@ -45,8 +50,12 @@ func Test_restError_HttpResponse(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := tt.r.HttpResponse(); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("restError.HttpResponse() = %v, want %v", got, tt.want)
+			//if got := tt.r.HttpResponse(); !reflect.DeepEqual(got, tt.want) {
+			//	t.Errorf("restError.HttpResponse() = %v, want %v", got, tt.want)
+			//}
+			got := tt.r.HttpResponse();
+			if diff := deep.Equal(got, tt.want); diff != nil {
+				t.Error(diff)
 			}
 		})
 	}
@@ -78,8 +87,12 @@ func Test_isErrorResponse(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := isErrorResponse(tt.args.resp); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("isErrorResponse() = %v, want %v", got, tt.want)
+			//if got := isErrorResponse(tt.args.resp); !reflect.DeepEqual(got, tt.want) {
+			//	t.Errorf("isErrorResponse() = %v, want %v", got, tt.want)
+			//}
+			got := isErrorResponse(tt.args.resp);
+			if diff := deep.Equal(got, tt.want); diff != nil {
+				t.Error(diff)
 			}
 		})
 	}

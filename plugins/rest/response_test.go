@@ -5,12 +5,13 @@ import (
 	"errors"
 	"net/http"
 	"net/http/httptest"
-	"reflect"
 	"testing"
 
-	"github.com/easyops-cn/giraffe-micro"
 	giraffeproto "github.com/easyops-cn/go-proto-giraffe"
+	"github.com/go-test/deep"
 	"github.com/gogo/protobuf/types"
+
+	"github.com/easyops-cn/giraffe-micro"
 )
 
 type ErrReadCloser struct{}
@@ -134,8 +135,11 @@ func Test_parseResponse(t *testing.T) {
 				t.Errorf("parseResponse() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if !reflect.DeepEqual(tt.args.out, tt.want) {
-				t.Errorf("parseResponse() = %v, want %v", tt.args.out, tt.want)
+			//if !reflect.DeepEqual(tt.args.out, tt.want) {
+			//	t.Errorf("parseResponse() = %v, want %v", tt.args.out, tt.want)
+			//}
+			if diff := deep.Equal(tt.args.out, tt.want); diff != nil {
+				t.Error(diff)
 			}
 		})
 	}

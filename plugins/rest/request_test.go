@@ -3,14 +3,14 @@ package rest
 import (
 	"bytes"
 	"net/http"
-	"reflect"
 	"testing"
 
-	"github.com/easyops-cn/giraffe-micro"
 	giraffeproto "github.com/easyops-cn/go-proto-giraffe"
 	"github.com/go-test/deep"
 	"github.com/gogo/protobuf/proto"
 	"github.com/gogo/protobuf/types"
+
+	"github.com/easyops-cn/giraffe-micro"
 )
 
 type GetDetailRequest struct {
@@ -444,11 +444,17 @@ func Test_isProtoMessage(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got, got1 := isProtoMessage(tt.args.v)
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("isProtoMessage() got = %v, want %v", got, tt.want)
+			//if !reflect.DeepEqual(got, tt.want) {
+			//	t.Errorf("isProtoMessage() got = %v, want %v", got, tt.want)
+			//}
+			//if got1 != tt.want1 {
+			//	t.Errorf("isProtoMessage() got1 = %v, want %v", got1, tt.want1)
+			//}
+			if diff := deep.Equal(got, tt.want); diff != nil {
+				t.Error(diff)
 			}
-			if got1 != tt.want1 {
-				t.Errorf("isProtoMessage() got1 = %v, want %v", got1, tt.want1)
+			if diff := deep.Equal(got1, tt.want1); diff != nil {
+				t.Error(diff)
 			}
 		})
 	}
@@ -529,8 +535,12 @@ func Test_marshalDataField(t *testing.T) {
 				t.Errorf("marshalDataField() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if gotOut := out.String(); gotOut != tt.wantOut {
-				t.Errorf("marshalDataField() = %v, want %v", gotOut, tt.wantOut)
+			//if gotOut := out.String(); gotOut != tt.wantOut {
+			//	t.Errorf("marshalDataField() = %v, want %v", gotOut, tt.wantOut)
+			//}
+			gotOut := out.String();
+			if diff := deep.Equal(gotOut, tt.wantOut); diff != nil {
+				t.Error(diff)
 			}
 		})
 	}

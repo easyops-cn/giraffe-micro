@@ -4,8 +4,9 @@ import (
 	"context"
 	"errors"
 	"net/http"
-	"reflect"
 	"testing"
+
+	"github.com/go-test/deep"
 )
 
 type mockTransport struct {}
@@ -59,8 +60,11 @@ func Test_transport_RoundTrip(t *testing.T) {
 				t.Errorf("transport.RoundTrip() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("transport.RoundTrip() = %v, want %v", got, tt.want)
+			//if !reflect.DeepEqual(got, tt.want) {
+			//	t.Errorf("transport.RoundTrip() = %v, want %v", got, tt.want)
+			//}
+			if diff := deep.Equal(got, tt.want); diff != nil {
+				t.Error(diff)
 			}
 		})
 	}
@@ -96,8 +100,12 @@ func TestNewTransport(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := NewTransport(tt.args.rt); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("NewTransport() = %v, want %v", got, tt.want)
+			//if got := NewTransport(tt.args.rt); !reflect.DeepEqual(got, tt.want) {
+			//	t.Errorf("NewTransport() = %v, want %v", got, tt.want)
+			//}
+			got := NewTransport(tt.args.rt)
+			if diff := deep.Equal(got, tt.want); diff != nil {
+				t.Error(diff)
 			}
 		})
 	}

@@ -3,8 +3,9 @@ package auth
 import (
 	"context"
 	"net/http"
-	"reflect"
 	"testing"
+
+	"github.com/go-test/deep"
 )
 
 var (
@@ -33,8 +34,12 @@ func TestWithUserInfo(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := WithUserInfo(tt.args.ctx, tt.args.info); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("WithUserInfo() = %v, want %v", got, tt.want)
+			got := WithUserInfo(tt.args.ctx, tt.args.info)
+			//if got := WithUserInfo(tt.args.ctx, tt.args.info); !reflect.DeepEqual(got, tt.want) {
+			//	t.Errorf("WithUserInfo() = %v, want %v", got, tt.want)
+			//}
+			if diff := deep.Equal(got, tt.want); diff != nil {
+				t.Error(diff)
 			}
 		})
 	}
@@ -70,11 +75,17 @@ func TestFromContext(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got, got1 := FromContext(tt.args.ctx)
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("FromContext() got = %v, want %v", got, tt.want)
+			//if !reflect.DeepEqual(got, tt.want) {
+			//	t.Errorf("FromContext() got = %v, want %v", got, tt.want)
+			//}
+			//if got1 != tt.want1 {
+			//	t.Errorf("FromContext() got1 = %v, want %v", got1, tt.want1)
+			//}
+			if diff := deep.Equal(got, tt.want); diff != nil {
+				t.Error(diff)
 			}
-			if got1 != tt.want1 {
-				t.Errorf("FromContext() got1 = %v, want %v", got1, tt.want1)
+			if diff := deep.Equal(got1, tt.want1); diff != nil {
+				t.Error(diff)
 			}
 		})
 	}
@@ -114,8 +125,12 @@ func TestFromRequest(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := FromRequest(tt.args.req); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("FromRequest() = %v, want %v", got, tt.want)
+			//if got := FromRequest(tt.args.req); !reflect.DeepEqual(got, tt.want) {
+			//	t.Errorf("FromRequest() = %v, want %v", got, tt.want)
+			//}
+			got := FromRequest(tt.args.req)
+			if diff := deep.Equal(got, tt.want); diff != nil {
+				t.Error(diff)
 			}
 		})
 	}
