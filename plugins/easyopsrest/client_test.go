@@ -93,7 +93,7 @@ func TestNewClient(t *testing.T) {
 }
 
 func TestNewClient2(t *testing.T) {
-	restClientFactory = func(opts ...rest.ClientOption) (client giraffe.Client, e error) {
+	restClientFactory = func(opts ...rest.ClientOption) (client rest.Client, e error) {
 		return nil, errors.New("always failed")
 	}
 	type args struct {

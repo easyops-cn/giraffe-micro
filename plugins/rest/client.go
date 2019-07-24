@@ -13,6 +13,12 @@ import (
 // for unit testing convenient
 var zipkinTransportFactory = zipkinhttp.NewTransport
 
+type Client interface {
+	giraffe.Client
+	NewRequest(md *giraffe.MethodDesc, in interface{}) (*http.Request, error)
+	Call(ctx context.Context, md *giraffe.MethodDesc, req *http.Request, out interface{}) error
+}
+
 type client struct {
 	c       *http.Client
 	options ClientOptions
@@ -39,20 +45,23 @@ func (c *client) init(opt ClientOptions) error {
 	return nil
 }
 
-func (c *client) Invoke(ctx context.Context, md *giraffe.MethodDesc, in interface{}, out interface{}) error {
+func (c *client) NewRequest(md *giraffe.MethodDesc, in interface{}) (*http.Request, error) {
 	request, err := newRequest(md, in)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	request = request.WithContext(ctx)
-
 	addr, err := c.options.NameService.GetAddress(md.Contract)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	request.URL.Host = addr
 	request.URL.Scheme = "http"
 
+	return request, nil
+}
+
+func (c *client) Call(ctx context.Context, md *giraffe.MethodDesc, req *http.Request, out interface{}) error {
+	request := req.WithContext(ctx)
 	response, err := c.c.Do(request)
 	if err != nil {
 		return err
@@ -63,11 +72,19 @@ func (c *client) Invoke(ctx context.Context, md *giraffe.MethodDesc, in interfac
 	return nil
 }
 
+func (c *client) Invoke(ctx context.Context, md *giraffe.MethodDesc, in interface{}, out interface{}) error {
+	req, err := c.NewRequest(md, in)
+	if err != nil {
+		return err
+	}
+	return c.Call(ctx, md, req, out)
+}
+
 func (c *client) NewStream(ctx context.Context, sd *giraffe.StreamDesc) (giraffe.ClientStream, error) {
 	return nil, errors.New("not supported")
 }
 
-func NewClient(opts ...ClientOption) (giraffe.Client, error) {
+func NewClient(opts ...ClientOption) (Client, error) {
 	opt := newClientOptions(opts...)
 
 	c := &client{
