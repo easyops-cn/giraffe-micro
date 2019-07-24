@@ -1,11 +1,17 @@
 language: go
 
 go:
+  - 1.11.x
   - 1.12.x
-  - tip
+  - master
+os:
+  - linux
+  - osx
+dist: trusty
+sudo: false
 install:
   - go get golang.org/x/tools/cmd/cover
   - go get github.com/mattn/goveralls
 script:
-  - go test -v -tags travis -covermode=count -coverprofile=coverage.out ./...
+  - env GO111MODULE=on go test -v -tags travis -covermode=count -coverprofile=coverage.out ./...
   - $GOPATH/bin/goveralls -coverprofile=coverage.out -service=travis-ci -repotoken $COVERALLS_TOKEN
