@@ -4,9 +4,8 @@ go:
   - 1.12.x
   - tip
 install:
-  go get golang.org/x/tools/cmd/cover
-  go get github.com/mattn/goveralls
+  - go get golang.org/x/tools/cmd/cover
+  - go get github.com/mattn/goveralls
 script:
-  go test -v -tags travis -covermode=count -coverprofile=coverage.out
-  $HOME/gopath/bin/goveralls -coverprofile=coverage.out -service=travis-ci -repotoken $COVERALLS_TOKEN
-  ./...
+  - go test -v -tags travis -covermode=count -coverprofile=coverage.out ./...
+  - $GOPATH/bin/goveralls -coverprofile=coverage.out -service=travis-ci -repotoken $COVERALLS_TOKEN
