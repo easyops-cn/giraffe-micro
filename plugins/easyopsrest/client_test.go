@@ -3,10 +3,10 @@ package rest
 import (
 	"errors"
 	"net/http"
-	"reflect"
 	"testing"
 	"time"
 
+	"github.com/go-test/deep"
 	"github.com/openzipkin/zipkin-go"
 
 	"github.com/easyops-cn/giraffe-micro"
@@ -85,8 +85,11 @@ func TestNewClient(t *testing.T) {
 				t.Errorf("NewClient() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("NewClient() = %v, want %v", got, tt.want)
+			//if !reflect.DeepEqual(got, tt.want) {
+			//	t.Errorf("NewClient() = %v, want %v", got, tt.want)
+			//}
+			if diff := deep.Equal(got, tt.want); diff != nil {
+				t.Error(diff)
 			}
 		})
 	}
@@ -126,8 +129,11 @@ func TestNewClient2(t *testing.T) {
 				t.Errorf("NewClient() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("NewClient() = %v, want %v", got, tt.want)
+			//if !reflect.DeepEqual(got, tt.want) {
+			//	t.Errorf("NewClient() = %v, want %v", got, tt.want)
+			//}
+			if diff := deep.Equal(got, tt.want); diff != nil {
+				t.Error(diff)
 			}
 		})
 	}
