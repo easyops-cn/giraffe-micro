@@ -9,8 +9,8 @@ import (
 )
 
 var (
-	ctxWithValue = context.WithValue(context.Background(), ctxKey, UserInfo{User:"foo",Org:8888})
-	userInfo = UserInfo{User:"foo", Org:8888}
+	ctxWithValue = context.WithValue(context.Background(), ctxKey, UserInfo{User: "foo", Org: 8888})
+	userInfo     = UserInfo{User: "foo", Org: 8888}
 )
 
 func TestWithUserInfo(t *testing.T) {
@@ -26,7 +26,7 @@ func TestWithUserInfo(t *testing.T) {
 		{
 			name: "Test_HappyPath",
 			args: args{
-				ctx: context.Background(),
+				ctx:  context.Background(),
 				info: userInfo,
 			},
 			want: ctxWithValue,
@@ -60,7 +60,7 @@ func TestFromContext(t *testing.T) {
 			args: args{
 				ctxWithValue,
 			},
-			want: userInfo,
+			want:  userInfo,
 			want1: true,
 		},
 		{
@@ -68,7 +68,7 @@ func TestFromContext(t *testing.T) {
 			args: args{
 				context.Background(),
 			},
-			want: UserInfo{},
+			want:  UserInfo{},
 			want1: false,
 		},
 	}

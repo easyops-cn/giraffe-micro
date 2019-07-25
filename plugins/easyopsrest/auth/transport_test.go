@@ -9,7 +9,7 @@ import (
 	"github.com/go-test/deep"
 )
 
-type mockTransport struct {}
+type mockTransport struct{}
 
 func (*mockTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	ctx := FromRequest(req)
@@ -43,10 +43,10 @@ func Test_transport_RoundTrip(t *testing.T) {
 			args: args{
 				r: func() *http.Request {
 					r, _ := http.NewRequest("GET", "/", nil)
-					return r.WithContext(WithUserInfo(context.Background(), UserInfo{User:"foo", Org:8888}))
+					return r.WithContext(WithUserInfo(context.Background(), UserInfo{User: "foo", Org: 8888}))
 				}(),
 			},
-			want: &http.Response{},
+			want:    &http.Response{},
 			wantErr: false,
 		},
 	}

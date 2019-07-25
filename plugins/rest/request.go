@@ -83,7 +83,9 @@ func getPattern(rule giraffe.HttpRule) (verb string, path string, err error) {
 	case rule.GetPatch() != "":
 		return http.MethodPatch, rule.GetPatch(), nil
 	default:
-		if r, ok := rule.(interface{ GetCustom() *giraffeproto.CustomHttpPattern }); ok && r.GetCustom().GetPath() != "" {
+		if r, ok := rule.(interface {
+			GetCustom() *giraffeproto.CustomHttpPattern
+		}); ok && r.GetCustom().GetPath() != "" {
 			return r.GetCustom().GetKind(), r.GetCustom().GetPath(), nil
 		}
 	}

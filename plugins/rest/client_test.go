@@ -19,12 +19,20 @@ import (
 )
 
 type FakeNameService struct{}
-func (*FakeNameService) GetAddress(contract giraffe.Contract) (string, error) { return "", nil }
-func (*FakeNameService) GetAllAddresses(contract giraffe.Contract) ([]string, error) { return []string{}, nil }
 
-type ErrNameService struct {}
-func (*ErrNameService) GetAddress(contract giraffe.Contract) (string, error) { return "", errors.New("") }
-func (*ErrNameService) GetAllAddresses(contract giraffe.Contract) ([]string, error) { return []string{}, errors.New("") }
+func (*FakeNameService) GetAddress(contract giraffe.Contract) (string, error) { return "", nil }
+func (*FakeNameService) GetAllAddresses(contract giraffe.Contract) ([]string, error) {
+	return []string{}, nil
+}
+
+type ErrNameService struct{}
+
+func (*ErrNameService) GetAddress(contract giraffe.Contract) (string, error) {
+	return "", errors.New("")
+}
+func (*ErrNameService) GetAllAddresses(contract giraffe.Contract) ([]string, error) {
+	return []string{}, errors.New("")
+}
 
 var ns = &FakeNameService{}
 var tracer = &zipkin.Tracer{}
@@ -186,7 +194,7 @@ func Test_client_NewStream(t *testing.T) {
 	}
 }
 
-type statusOKTransport struct {}
+type statusOKTransport struct{}
 
 func (t *statusOKTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	rec := httptest.NewRecorder()
@@ -196,7 +204,7 @@ func (t *statusOKTransport) RoundTrip(req *http.Request) (*http.Response, error)
 	return rec.Result(), nil
 }
 
-type statusNotFoundTransport struct {}
+type statusNotFoundTransport struct{}
 
 func (t *statusNotFoundTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	rec := httptest.NewRecorder()
@@ -206,7 +214,7 @@ func (t *statusNotFoundTransport) RoundTrip(req *http.Request) (*http.Response, 
 	return rec.Result(), nil
 }
 
-type failedTransport struct {}
+type failedTransport struct{}
 
 func (t *failedTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	return nil, errors.New("always error")
@@ -243,11 +251,11 @@ func Test_client_Invoke(t *testing.T) {
 				ctx: context.Background(),
 				md: &giraffe.MethodDesc{
 					Contract: &giraffeproto.Contract{
-						Name: "easyops.api.cmdb.instance.GetDetail",
+						Name:    "easyops.api.cmdb.instance.GetDetail",
 						Version: "1.0",
 					},
 					ServiceName: "instance.rpc",
-					MethodName: "GetDetail",
+					MethodName:  "GetDetail",
 					HttpRule: &giraffeproto.HttpRule{
 						Pattern: &giraffeproto.HttpRule_Get{
 							Get: "/object/:objectId/instance/:instanceId",
@@ -255,7 +263,7 @@ func Test_client_Invoke(t *testing.T) {
 						Body: "",
 					},
 				},
-				in: &GetDetailRequest{},
+				in:  &GetDetailRequest{},
 				out: &types.Struct{},
 			},
 			wantErr: false,
@@ -274,13 +282,13 @@ func Test_client_Invoke(t *testing.T) {
 				ctx: context.Background(),
 				md: &giraffe.MethodDesc{
 					Contract: &giraffeproto.Contract{
-						Name: "easyops.api.cmdb.instance.GetDetail",
+						Name:    "easyops.api.cmdb.instance.GetDetail",
 						Version: "1.0",
 					},
 					ServiceName: "instance.rpc",
-					MethodName: "GetDetail",
+					MethodName:  "GetDetail",
 				},
-				in: &GetDetailRequest{},
+				in:  &GetDetailRequest{},
 				out: &types.Struct{},
 			},
 			wantErr: true,
@@ -299,11 +307,11 @@ func Test_client_Invoke(t *testing.T) {
 				ctx: context.Background(),
 				md: &giraffe.MethodDesc{
 					Contract: &giraffeproto.Contract{
-						Name: "easyops.api.cmdb.instance.GetDetail",
+						Name:    "easyops.api.cmdb.instance.GetDetail",
 						Version: "1.0",
 					},
 					ServiceName: "instance.rpc",
-					MethodName: "GetDetail",
+					MethodName:  "GetDetail",
 					HttpRule: &giraffeproto.HttpRule{
 						Pattern: &giraffeproto.HttpRule_Get{
 							Get: "/object/:objectId/instance/:instanceId",
@@ -311,7 +319,7 @@ func Test_client_Invoke(t *testing.T) {
 						Body: "",
 					},
 				},
-				in: &GetDetailRequest{},
+				in:  &GetDetailRequest{},
 				out: &types.Struct{},
 			},
 			wantErr: true,
@@ -330,11 +338,11 @@ func Test_client_Invoke(t *testing.T) {
 				ctx: context.Background(),
 				md: &giraffe.MethodDesc{
 					Contract: &giraffeproto.Contract{
-						Name: "easyops.api.cmdb.instance.GetDetail",
+						Name:    "easyops.api.cmdb.instance.GetDetail",
 						Version: "1.0",
 					},
 					ServiceName: "instance.rpc",
-					MethodName: "GetDetail",
+					MethodName:  "GetDetail",
 					HttpRule: &giraffeproto.HttpRule{
 						Pattern: &giraffeproto.HttpRule_Get{
 							Get: "/object/:objectId/instance/:instanceId",
@@ -342,7 +350,7 @@ func Test_client_Invoke(t *testing.T) {
 						Body: "",
 					},
 				},
-				in: &GetDetailRequest{},
+				in:  &GetDetailRequest{},
 				out: &types.Struct{},
 			},
 			wantErr: true,
@@ -361,11 +369,11 @@ func Test_client_Invoke(t *testing.T) {
 				ctx: context.Background(),
 				md: &giraffe.MethodDesc{
 					Contract: &giraffeproto.Contract{
-						Name: "easyops.api.cmdb.instance.GetDetail",
+						Name:    "easyops.api.cmdb.instance.GetDetail",
 						Version: "1.0",
 					},
 					ServiceName: "instance.rpc",
-					MethodName: "GetDetail",
+					MethodName:  "GetDetail",
 					HttpRule: &giraffeproto.HttpRule{
 						Pattern: &giraffeproto.HttpRule_Get{
 							Get: "/object/:objectId/instance/:instanceId",
@@ -373,7 +381,7 @@ func Test_client_Invoke(t *testing.T) {
 						Body: "",
 					},
 				},
-				in: &GetDetailRequest{},
+				in:  &GetDetailRequest{},
 				out: &types.Struct{},
 			},
 			wantErr: true,

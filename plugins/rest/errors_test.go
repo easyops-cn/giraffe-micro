@@ -19,7 +19,7 @@ func Test_restError_Error(t *testing.T) {
 	}{
 		{
 			name: "Test_HappyPath",
-			r: (*restError)(resp404),
+			r:    (*restError)(resp404),
 			want: resp404.Status,
 		},
 	}
@@ -28,7 +28,7 @@ func Test_restError_Error(t *testing.T) {
 			//if got := tt.r.Error(); got != tt.want {
 			//	t.Errorf("restError.Error() = %v, want %v", got, tt.want)
 			//}
-			got := tt.r.Error();
+			got := tt.r.Error()
 			if diff := deep.Equal(got, tt.want); diff != nil {
 				t.Error(diff)
 			}
@@ -44,7 +44,7 @@ func Test_restError_HttpResponse(t *testing.T) {
 	}{
 		{
 			name: "Test_HappyPath",
-			r: (*restError)(resp404),
+			r:    (*restError)(resp404),
 			want: resp404,
 		},
 	}
@@ -53,7 +53,7 @@ func Test_restError_HttpResponse(t *testing.T) {
 			//if got := tt.r.HttpResponse(); !reflect.DeepEqual(got, tt.want) {
 			//	t.Errorf("restError.HttpResponse() = %v, want %v", got, tt.want)
 			//}
-			got := tt.r.HttpResponse();
+			got := tt.r.HttpResponse()
 			if diff := deep.Equal(got, tt.want); diff != nil {
 				t.Error(diff)
 			}
@@ -90,7 +90,7 @@ func Test_isErrorResponse(t *testing.T) {
 			//if got := isErrorResponse(tt.args.resp); !reflect.DeepEqual(got, tt.want) {
 			//	t.Errorf("isErrorResponse() = %v, want %v", got, tt.want)
 			//}
-			got := isErrorResponse(tt.args.resp);
+			got := isErrorResponse(tt.args.resp)
 			if diff := deep.Equal(got, tt.want); diff != nil {
 				t.Error(diff)
 			}
