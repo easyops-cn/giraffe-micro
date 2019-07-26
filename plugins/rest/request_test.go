@@ -461,18 +461,18 @@ func Test_isProtoMessage(t *testing.T) {
 }
 
 type GetDetailRequestWrapper struct {
-	Data []byte
-	ObjectId             string   `protobuf:"bytes,1,opt,name=objectId,proto3" json:"objectId" form:"objectId"`
-	InstanceId           string   `protobuf:"bytes,2,opt,name=instanceId,proto3" json:"instanceId" form:"instanceId"`
-	Wrapper *GetDetailRequest `protobuf:"bytes,2,opt,name=wrapper,proto3" json:"wrapper"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
+	Data                 []byte
+	ObjectId             string            `protobuf:"bytes,1,opt,name=objectId,proto3" json:"objectId" form:"objectId"`
+	InstanceId           string            `protobuf:"bytes,2,opt,name=instanceId,proto3" json:"instanceId" form:"instanceId"`
+	Wrapper              *GetDetailRequest `protobuf:"bytes,2,opt,name=wrapper,proto3" json:"wrapper"`
+	XXX_NoUnkeyedLiteral struct{}          `json:"-"`
+	XXX_unrecognized     []byte            `json:"-"`
+	XXX_sizecache        int32             `json:"-"`
 }
 
-func (m *GetDetailRequestWrapper) Reset() { *m = GetDetailRequestWrapper{} }
+func (m *GetDetailRequestWrapper) Reset()         { *m = GetDetailRequestWrapper{} }
 func (m *GetDetailRequestWrapper) String() string { return proto.CompactTextString(m) }
-func (m *GetDetailRequestWrapper) ProtoMessage() {}
+func (m *GetDetailRequestWrapper) ProtoMessage()  {}
 
 func Test_marshalDataField(t *testing.T) {
 	type args struct {
@@ -489,7 +489,7 @@ func Test_marshalDataField(t *testing.T) {
 			name: "Test_CallWithNil",
 			args: args{
 				name: "data",
-				pb: nil,
+				pb:   nil,
 			},
 			wantOut: "",
 			wantErr: true,
@@ -538,7 +538,7 @@ func Test_marshalDataField(t *testing.T) {
 			//if gotOut := out.String(); gotOut != tt.wantOut {
 			//	t.Errorf("marshalDataField() = %v, want %v", gotOut, tt.wantOut)
 			//}
-			gotOut := out.String();
+			gotOut := out.String()
 			if diff := deep.Equal(gotOut, tt.wantOut); diff != nil {
 				t.Error(diff)
 			}

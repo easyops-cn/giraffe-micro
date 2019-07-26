@@ -15,6 +15,7 @@ type query struct {
 	url.Values
 }
 
+//Add 添加 query 参数
 func (q *query) Add(key string, rv reflect.Value) {
 	value := ""
 	if v := fmt.Sprintf("%v", rv.Interface()); v != "<nil>" {
@@ -81,13 +82,12 @@ func fieldProperties(f reflect.StructField) *proto.Properties {
 	return &prop
 }
 
-// Marshal takes an object and converts it to a url.Values object using JSON tags as
-// parameter names. Only top-level simple values, arrays, and slices are serialized.
-// Embedded structs, maps, etc. will not be serialized.
+//Marshal 根据 message 解析成 url.Value, message 中只有第一层字段会被处理
 func Marshal(pb proto.Message) (url.Values, error) {
 	return marshal(pb)
 }
 
+//ParseURL 解释rawurl
 func ParseURL(rawurl string, pb proto.Message, parseQuery bool) (*url.URL, error) {
 	u, err := url.Parse(rawurl)
 	if err != nil {

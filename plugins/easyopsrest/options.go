@@ -11,7 +11,8 @@ import (
 	"github.com/easyops-cn/giraffe-micro/plugins/rest"
 )
 
-// Deprecated: Replace by go.easyops.local/giraffe-micro/v2/rest
+//ClientOption 客户端配置数据结构
+//Deprecated: Replace by go.easyops.local/giraffe-micro/v2/rest
 type ClientOption func(o *rest.ClientOptions)
 
 func newClientOptions(opts ...ClientOption) rest.ClientOptions {
@@ -29,28 +30,32 @@ func newClientOptions(opts ...ClientOption) rest.ClientOptions {
 	return opt
 }
 
-// Deprecated: Replace by go.easyops.local/giraffe-micro/v2/rest
+//WithTimeout 超时配置项
+//Deprecated: Replace by go.easyops.local/giraffe-micro/v2/rest
 func WithTimeout(timeout time.Duration) ClientOption {
 	return func(o *rest.ClientOptions) {
 		o.Timeout = timeout
 	}
 }
 
-// Deprecated: Replace by go.easyops.local/giraffe-micro/v2/rest
+//WithNameService 名字服务配置项
+//Deprecated: Replace by go.easyops.local/giraffe-micro/v2/rest
 func WithNameService(ns giraffe.NameService) ClientOption {
 	return func(o *rest.ClientOptions) {
 		o.NameService = ns
 	}
 }
 
-// Deprecated: Replace by go.easyops.local/giraffe-micro/v2/rest
+//WithTracer Tracer配置项
+//Deprecated: Replace by go.easyops.local/giraffe-micro/v2/rest
 func WithTracer(tracer *zipkin.Tracer) ClientOption {
 	return func(o *rest.ClientOptions) {
 		o.Tracer = tracer
 	}
 }
 
-// Deprecated: Replace by go.easyops.local/giraffe-micro/v2/rest
+//WithRoundTripper HTTP配置项
+//Deprecated: Replace by go.easyops.local/giraffe-micro/v2/rest
 func WithRoundTripper(rt http.RoundTripper) ClientOption {
 	return func(o *rest.ClientOptions) {
 		o.Transport = rt
