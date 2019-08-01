@@ -3,6 +3,8 @@ package rest
 import (
 	"context"
 	"errors"
+	"io"
+	"io/ioutil"
 	"net/http"
 
 	zipkinhttp "github.com/openzipkin/zipkin-go/middleware/http"
@@ -63,6 +65,12 @@ func (c *client) NewRequest(md *giraffe.MethodDesc, in interface{}) (*http.Reque
 func (c *client) Call(ctx context.Context, md *giraffe.MethodDesc, req *http.Request, out interface{}) error {
 	request := req.WithContext(ctx)
 	response, err := c.c.Do(request)
+	if response != nil {
+		defer func() {
+			_, _ = io.Copy(ioutil.Discard, response.Body)
+			_ = response.Body.Close()
+		}()
+	}
 	if err != nil {
 		return err
 	}
