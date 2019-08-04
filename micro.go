@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/easyops-cn/giraffe-micro/codes"
+	"github.com/easyops-cn/giraffe-micro/metadata"
 )
 
 //UnaryEndpoint 单次调用函数
@@ -11,6 +12,9 @@ type UnaryEndpoint func(ctx context.Context, req interface{}) (interface{}, erro
 
 //StreamEndpoint 流式调用函数
 type StreamEndpoint func(ctx context.Context, stream ServiceStream) error
+
+//CallOption 请求配置函数
+type CallOption func(o *CallOptions)
 
 //Server 服务端接口
 type Server interface {
@@ -20,8 +24,8 @@ type Server interface {
 
 //Client 客户端接口
 type Client interface {
-	Invoke(ctx context.Context, md *MethodDesc, in interface{}, out interface{}) error
-	NewStream(ctx context.Context, sd *StreamDesc) (ClientStream, error)
+	Invoke(ctx context.Context, md *MethodDesc, in interface{}, out interface{}, opts ...CallOption) error
+	NewStream(ctx context.Context, sd *StreamDesc, opts ...CallOption) (ClientStream, error)
 }
 
 //ClientStream 流式客户端接口
@@ -83,4 +87,9 @@ type StreamDesc struct {
 	StreamName    string
 	ClientStreams bool
 	ServerStreams bool
+}
+
+//CallOptions 请求配置
+type CallOptions struct {
+	Metadata metadata.MD
 }
