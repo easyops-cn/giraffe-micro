@@ -14,13 +14,13 @@ import (
 	"github.com/easyops-cn/giraffe-micro"
 )
 
-type ErrReadCloser struct{}
+type errReadCloser struct{}
 
-func (*ErrReadCloser) Read(p []byte) (n int, err error) {
+func (*errReadCloser) Read(p []byte) (n int, err error) {
 	return 0, errors.New("always error")
 }
 
-func (*ErrReadCloser) Close() error {
+func (*errReadCloser) Close() error {
 	return nil
 }
 
@@ -101,7 +101,7 @@ func Test_parseResponse(t *testing.T) {
 					},
 				},
 				resp: &http.Response{
-					Body: &ErrReadCloser{},
+					Body: &errReadCloser{},
 				},
 				out: new(types.Struct),
 			},

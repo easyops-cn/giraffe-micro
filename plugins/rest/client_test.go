@@ -18,23 +18,23 @@ import (
 	"github.com/easyops-cn/giraffe-micro"
 )
 
-type FakeNameService struct{}
+type fakeNameService struct{}
 
-func (*FakeNameService) GetAddress(contract giraffe.Contract) (string, error) { return "", nil }
-func (*FakeNameService) GetAllAddresses(contract giraffe.Contract) ([]string, error) {
+func (*fakeNameService) GetAddress(contract giraffe.Contract) (string, error) { return "", nil }
+func (*fakeNameService) GetAllAddresses(contract giraffe.Contract) ([]string, error) {
 	return []string{}, nil
 }
 
-type ErrNameService struct{}
+type errNameService struct{}
 
-func (*ErrNameService) GetAddress(contract giraffe.Contract) (string, error) {
+func (*errNameService) GetAddress(contract giraffe.Contract) (string, error) {
 	return "", errors.New("")
 }
-func (*ErrNameService) GetAllAddresses(contract giraffe.Contract) ([]string, error) {
+func (*errNameService) GetAllAddresses(contract giraffe.Contract) ([]string, error) {
 	return []string{}, errors.New("")
 }
 
-var ns = &FakeNameService{}
+var ns = &fakeNameService{}
 var tracer = &zipkin.Tracer{}
 var transport = &http.Transport{MaxIdleConns: 100}
 
@@ -263,7 +263,7 @@ func Test_client_Invoke(t *testing.T) {
 						Body: "",
 					},
 				},
-				in:  &GetDetailRequest{},
+				in:  &getDetailRequest{},
 				out: &types.Struct{},
 			},
 			wantErr: false,
@@ -288,7 +288,7 @@ func Test_client_Invoke(t *testing.T) {
 					ServiceName: "instance.rpc",
 					MethodName:  "GetDetail",
 				},
-				in:  &GetDetailRequest{},
+				in:  &getDetailRequest{},
 				out: &types.Struct{},
 			},
 			wantErr: true,
@@ -300,7 +300,7 @@ func Test_client_Invoke(t *testing.T) {
 					Transport: &statusOKTransport{},
 				},
 				options: ClientOptions{
-					NameService: &ErrNameService{},
+					NameService: &errNameService{},
 				},
 			},
 			args: args{
@@ -319,7 +319,7 @@ func Test_client_Invoke(t *testing.T) {
 						Body: "",
 					},
 				},
-				in:  &GetDetailRequest{},
+				in:  &getDetailRequest{},
 				out: &types.Struct{},
 			},
 			wantErr: true,
@@ -350,7 +350,7 @@ func Test_client_Invoke(t *testing.T) {
 						Body: "",
 					},
 				},
-				in:  &GetDetailRequest{},
+				in:  &getDetailRequest{},
 				out: &types.Struct{},
 			},
 			wantErr: true,
@@ -381,7 +381,7 @@ func Test_client_Invoke(t *testing.T) {
 						Body: "",
 					},
 				},
-				in:  &GetDetailRequest{},
+				in:  &getDetailRequest{},
 				out: &types.Struct{},
 			},
 			wantErr: true,

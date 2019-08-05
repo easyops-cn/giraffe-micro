@@ -13,7 +13,7 @@ import (
 	"github.com/easyops-cn/giraffe-micro"
 )
 
-type GetDetailRequest struct {
+type getDetailRequest struct {
 	ObjectId             string   `protobuf:"bytes,1,opt,name=objectId,proto3" json:"objectId" form:"objectId"`
 	InstanceId           string   `protobuf:"bytes,2,opt,name=instanceId,proto3" json:"instanceId" form:"instanceId"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
@@ -21,11 +21,11 @@ type GetDetailRequest struct {
 	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *GetDetailRequest) Reset()         { *m = GetDetailRequest{} }
-func (m *GetDetailRequest) String() string { return proto.CompactTextString(m) }
-func (*GetDetailRequest) ProtoMessage()    {}
+func (m *getDetailRequest) Reset()         { *m = getDetailRequest{} }
+func (m *getDetailRequest) String() string { return proto.CompactTextString(m) }
+func (*getDetailRequest) ProtoMessage()    {}
 
-type DeleteInstanceRequest struct {
+type deleteInstanceRequest struct {
 	ObjectId             string   `protobuf:"bytes,1,opt,name=objectId,proto3" json:"objectId" form:"objectId"`
 	InstanceId           string   `protobuf:"bytes,2,opt,name=instanceId,proto3" json:"instanceId" form:"instanceId"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
@@ -33,11 +33,11 @@ type DeleteInstanceRequest struct {
 	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *DeleteInstanceRequest) Reset()         { *m = DeleteInstanceRequest{} }
-func (m *DeleteInstanceRequest) String() string { return proto.CompactTextString(m) }
-func (*DeleteInstanceRequest) ProtoMessage()    {}
+func (m *deleteInstanceRequest) Reset()         { *m = deleteInstanceRequest{} }
+func (m *deleteInstanceRequest) String() string { return proto.CompactTextString(m) }
+func (*deleteInstanceRequest) ProtoMessage()    {}
 
-type CreateInstanceRequest struct {
+type createInstanceRequest struct {
 	ObjectId             string        `protobuf:"bytes,1,opt,name=objectId,proto3" json:"objectId" form:"objectId"`
 	Instance             *types.Struct `protobuf:"bytes,2,opt,name=instance,proto3" json:"instance" form:"instance"`
 	XXX_NoUnkeyedLiteral struct{}      `json:"-"`
@@ -45,11 +45,11 @@ type CreateInstanceRequest struct {
 	XXX_sizecache        int32         `json:"-"`
 }
 
-func (m *CreateInstanceRequest) Reset()         { *m = CreateInstanceRequest{} }
-func (m *CreateInstanceRequest) String() string { return proto.CompactTextString(m) }
-func (*CreateInstanceRequest) ProtoMessage()    {}
+func (m *createInstanceRequest) Reset()         { *m = createInstanceRequest{} }
+func (m *createInstanceRequest) String() string { return proto.CompactTextString(m) }
+func (*createInstanceRequest) ProtoMessage()    {}
 
-type UpdateInstanceRequest struct {
+type updateInstanceRequest struct {
 	ObjectId             string        `protobuf:"bytes,1,opt,name=objectId,proto3" json:"objectId" form:"objectId"`
 	InstanceId           string        `protobuf:"bytes,2,opt,name=instanceId,proto3" json:"instanceId" form:"instanceId"`
 	Instance             *types.Struct `protobuf:"bytes,3,opt,name=instance,proto3" json:"instance" form:"instance"`
@@ -58,9 +58,9 @@ type UpdateInstanceRequest struct {
 	XXX_sizecache        int32         `json:"-"`
 }
 
-func (m *UpdateInstanceRequest) Reset()         { *m = UpdateInstanceRequest{} }
-func (m *UpdateInstanceRequest) String() string { return proto.CompactTextString(m) }
-func (*UpdateInstanceRequest) ProtoMessage()    {}
+func (m *updateInstanceRequest) Reset()         { *m = updateInstanceRequest{} }
+func (m *updateInstanceRequest) String() string { return proto.CompactTextString(m) }
+func (*updateInstanceRequest) ProtoMessage()    {}
 
 func Test_newRequest(t *testing.T) {
 	type args struct {
@@ -90,7 +90,7 @@ func Test_newRequest(t *testing.T) {
 						Body: "",
 					},
 				},
-				in: &GetDetailRequest{
+				in: &getDetailRequest{
 					ObjectId:   "APP",
 					InstanceId: "abc",
 				},
@@ -118,7 +118,7 @@ func Test_newRequest(t *testing.T) {
 						Body: "",
 					},
 				},
-				in: &DeleteInstanceRequest{
+				in: &deleteInstanceRequest{
 					ObjectId:   "APP",
 					InstanceId: "abc",
 				},
@@ -146,7 +146,7 @@ func Test_newRequest(t *testing.T) {
 						Body: "instance",
 					},
 				},
-				in: &CreateInstanceRequest{
+				in: &createInstanceRequest{
 					ObjectId: "APP",
 					Instance: &types.Struct{
 						Fields: map[string]*types.Value{
@@ -208,7 +208,7 @@ func Test_newRequest(t *testing.T) {
 						Body: "instance",
 					},
 				},
-				in: &UpdateInstanceRequest{
+				in: &updateInstanceRequest{
 					ObjectId:   "APP",
 					InstanceId: "abc",
 					Instance: &types.Struct{
@@ -242,7 +242,7 @@ func Test_newRequest(t *testing.T) {
 						Body: "instance",
 					},
 				},
-				in: &UpdateInstanceRequest{
+				in: &updateInstanceRequest{
 					ObjectId:   "APP",
 					InstanceId: "abc",
 					Instance: &types.Struct{
@@ -271,7 +271,7 @@ func Test_newRequest(t *testing.T) {
 					MethodName:  "NotDefined",
 					HttpRule:    &giraffeproto.HttpRule{},
 				},
-				in: &UpdateInstanceRequest{},
+				in: &updateInstanceRequest{},
 			},
 			want:    nil,
 			wantErr: true,
@@ -287,7 +287,7 @@ func Test_newRequest(t *testing.T) {
 					ServiceName: "instance.rpc",
 					MethodName:  "UpdateInstance",
 				},
-				in: &UpdateInstanceRequest{},
+				in: &updateInstanceRequest{},
 			},
 			want:    nil,
 			wantErr: true,
@@ -309,7 +309,7 @@ func Test_newRequest(t *testing.T) {
 						Body: "",
 					},
 				},
-				in: (*GetDetailRequest)(nil),
+				in: (*getDetailRequest)(nil),
 			},
 			want:    nil,
 			wantErr: true,
@@ -352,7 +352,7 @@ func Test_newRequest(t *testing.T) {
 						Body: "instance",
 					},
 				},
-				in: &CreateInstanceRequest{
+				in: &createInstanceRequest{
 					ObjectId: "APP",
 					Instance: nil,
 				},
@@ -380,7 +380,7 @@ func Test_newRequest(t *testing.T) {
 						Body: "",
 					},
 				},
-				in: &GetDetailRequest{
+				in: &getDetailRequest{
 					ObjectId:   "APP",
 					InstanceId: "abc",
 				},
@@ -419,17 +419,17 @@ func Test_isProtoMessage(t *testing.T) {
 		{
 			name: "Test_HappyPath",
 			args: args{
-				v: CreateInstanceRequest{},
+				v: createInstanceRequest{},
 			},
-			want:  &CreateInstanceRequest{},
+			want:  &createInstanceRequest{},
 			want1: true,
 		},
 		{
 			name: "Test_HappyPath2",
 			args: args{
-				v: &CreateInstanceRequest{},
+				v: &createInstanceRequest{},
 			},
-			want:  &CreateInstanceRequest{},
+			want:  &createInstanceRequest{},
 			want1: true,
 		},
 		{
@@ -460,19 +460,19 @@ func Test_isProtoMessage(t *testing.T) {
 	}
 }
 
-type GetDetailRequestWrapper struct {
+type getDetailRequestWrapper struct {
 	Data                 []byte
 	ObjectId             string            `protobuf:"bytes,1,opt,name=objectId,proto3" json:"objectId" form:"objectId"`
 	InstanceId           string            `protobuf:"bytes,2,opt,name=instanceId,proto3" json:"instanceId" form:"instanceId"`
-	Wrapper              *GetDetailRequest `protobuf:"bytes,2,opt,name=wrapper,proto3" json:"wrapper"`
+	Wrapper              *getDetailRequest `protobuf:"bytes,2,opt,name=wrapper,proto3" json:"wrapper"`
 	XXX_NoUnkeyedLiteral struct{}          `json:"-"`
 	XXX_unrecognized     []byte            `json:"-"`
 	XXX_sizecache        int32             `json:"-"`
 }
 
-func (m *GetDetailRequestWrapper) Reset()         { *m = GetDetailRequestWrapper{} }
-func (m *GetDetailRequestWrapper) String() string { return proto.CompactTextString(m) }
-func (m *GetDetailRequestWrapper) ProtoMessage()  {}
+func (m *getDetailRequestWrapper) Reset()         { *m = getDetailRequestWrapper{} }
+func (m *getDetailRequestWrapper) String() string { return proto.CompactTextString(m) }
+func (m *getDetailRequestWrapper) ProtoMessage()  {}
 
 func Test_marshalDataField(t *testing.T) {
 	type args struct {
@@ -498,8 +498,8 @@ func Test_marshalDataField(t *testing.T) {
 			name: "Test_WithProtoWrapper",
 			args: args{
 				name: "wrapper",
-				pb: &GetDetailRequestWrapper{
-					Wrapper: &GetDetailRequest{},
+				pb: &getDetailRequestWrapper{
+					Wrapper: &getDetailRequest{},
 				},
 			},
 			wantOut: "{}",
@@ -509,8 +509,8 @@ func Test_marshalDataField(t *testing.T) {
 			name: "Test_WithWrongDataField",
 			args: args{
 				name: "xxx",
-				pb: &GetDetailRequestWrapper{
-					Wrapper: &GetDetailRequest{},
+				pb: &getDetailRequestWrapper{
+					Wrapper: &getDetailRequest{},
 				},
 			},
 			wantOut: "",
@@ -520,8 +520,8 @@ func Test_marshalDataField(t *testing.T) {
 			name: "Test_DataFieldWasNotProtoMessage",
 			args: args{
 				name: "objectId",
-				pb: &GetDetailRequestWrapper{
-					Wrapper: &GetDetailRequest{},
+				pb: &getDetailRequestWrapper{
+					Wrapper: &getDetailRequest{},
 				},
 			},
 			wantOut: "",
