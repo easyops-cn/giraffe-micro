@@ -1,8 +1,7 @@
-package rest
+package restv2
 
 import (
 	"bytes"
-	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -14,19 +13,9 @@ import (
 	"github.com/easyops-cn/giraffe-micro"
 )
 
-type errReadCloser struct{}
-
-func (*errReadCloser) Read(p []byte) (n int, err error) {
-	return 0, errors.New("always error")
-}
-
-func (*errReadCloser) Close() error {
-	return nil
-}
-
 func Test_parseResponse(t *testing.T) {
 	type args struct {
-		md      *giraffe.MethodDesc
+		rule    giraffe.HttpRule
 		resp    *http.Response
 		respRec *httptest.ResponseRecorder
 		out     interface{}
@@ -40,10 +29,8 @@ func Test_parseResponse(t *testing.T) {
 		{
 			name: "Test_HappyPath",
 			args: args{
-				md: &giraffe.MethodDesc{
-					HttpRule: &giraffeproto.HttpRule{
-						ResponseBody: "data",
-					},
+				rule: &giraffeproto.HttpRule{
+					ResponseBody: "data",
 				},
 				respRec: &httptest.ResponseRecorder{
 					Code: http.StatusCreated,
@@ -64,9 +51,7 @@ func Test_parseResponse(t *testing.T) {
 		{
 			name: "Test_UnexpectedMessage",
 			args: args{
-				md: &giraffe.MethodDesc{
-					HttpRule: &giraffeproto.HttpRule{},
-				},
+				rule: &giraffeproto.HttpRule{},
 				respRec: &httptest.ResponseRecorder{
 					Code: http.StatusCreated,
 					Body: bytes.NewBuffer([]byte("[" + "]")),
@@ -79,10 +64,8 @@ func Test_parseResponse(t *testing.T) {
 		{
 			name: "Test_404",
 			args: args{
-				md: &giraffe.MethodDesc{
-					HttpRule: &giraffeproto.HttpRule{
-						ResponseBody: "data",
-					},
+				rule: &giraffeproto.HttpRule{
+					ResponseBody: "data",
 				},
 				respRec: &httptest.ResponseRecorder{
 					Code: http.StatusNotFound,
@@ -95,10 +78,8 @@ func Test_parseResponse(t *testing.T) {
 		{
 			name: "Test_ReadResponseBodyFailed",
 			args: args{
-				md: &giraffe.MethodDesc{
-					HttpRule: &giraffeproto.HttpRule{
-						ResponseBody: "data",
-					},
+				rule: &giraffeproto.HttpRule{
+					ResponseBody: "data",
 				},
 				resp: &http.Response{
 					Body: &errReadCloser{},
@@ -111,10 +92,8 @@ func Test_parseResponse(t *testing.T) {
 		{
 			name: "Test_ReadDataFailed",
 			args: args{
-				md: &giraffe.MethodDesc{
-					HttpRule: &giraffeproto.HttpRule{
-						ResponseBody: "data",
-					},
+				rule: &giraffeproto.HttpRule{
+					ResponseBody: "data",
 				},
 				respRec: &httptest.ResponseRecorder{
 					Code: http.StatusNoContent,
@@ -131,13 +110,10 @@ func Test_parseResponse(t *testing.T) {
 			if tt.args.resp == nil {
 				tt.args.resp = tt.args.respRec.Result()
 			}
-			if err := parseResponse(tt.args.md, tt.args.resp, tt.args.out); (err != nil) != tt.wantErr {
+			if err := parseResponse(tt.args.rule, tt.args.resp, tt.args.out); (err != nil) != tt.wantErr {
 				t.Errorf("parseResponse() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			//if !reflect.DeepEqual(tt.args.out, tt.want) {
-			//	t.Errorf("parseResponse() = %v, want %v", tt.args.out, tt.want)
-			//}
 			if diff := deep.Equal(tt.args.out, tt.want); diff != nil {
 				t.Error(diff)
 			}
