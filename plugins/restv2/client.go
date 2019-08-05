@@ -2,6 +2,7 @@ package restv2
 
 import (
 	"context"
+	"errors"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -9,24 +10,28 @@ import (
 	"github.com/easyops-cn/giraffe-micro"
 )
 
+//Middleware 中间件定义
 type Middleware interface {
 	NewRequest(rule giraffe.HttpRule, in interface{}) (*http.Request, error)
 	ParseResponse(rule giraffe.HttpRule, resp *http.Response, out interface{}) error
 }
 
+//Client REST Client对象
 type Client struct {
 	*http.Client
 	Middleware  Middleware
 	NameService giraffe.NameService
 }
 
+//Invoke 单次请求方法
 func (c *Client) Invoke(ctx context.Context, md *giraffe.MethodDesc, in interface{}, out interface{}, opts ...giraffe.CallOption) error {
 	req, err := c.middleware().NewRequest(md.HttpRule, in)
 	if err != nil {
 		return err
 	}
 
-	resp, err := c.Call(md.Contract, req.WithContext(ctx), opts...)
+	req = req.WithContext(ctx)
+	resp, err := c.Call(md.Contract, req, opts...)
 	if resp != nil {
 		defer func() {
 			_, _ = io.Copy(ioutil.Discard, resp.Body)
@@ -40,8 +45,9 @@ func (c *Client) Invoke(ctx context.Context, md *giraffe.MethodDesc, in interfac
 	return c.middleware().ParseResponse(md.HttpRule, resp, out)
 }
 
+//NewStream 流式请求方法(未实现)
 func (c *Client) NewStream(ctx context.Context, sd *giraffe.StreamDesc, opts ...giraffe.CallOption) (giraffe.ClientStream, error) {
-	panic("implement me")
+	return nil, errors.New("not supported")
 }
 
 func (c *Client) middleware() Middleware {
@@ -51,7 +57,19 @@ func (c *Client) middleware() Middleware {
 	return DefaultMiddleware
 }
 
+func (c *Client) httpClient() *http.Client {
+	if c.Client == nil {
+		return http.DefaultClient
+	}
+	return c.Client
+}
+
+//Call 请求函数
 func (c *Client) Call(contract giraffe.Contract, req *http.Request, opts ...giraffe.CallOption) (*http.Response, error) {
+	if req == nil {
+		return nil, errors.New("request was nil")
+	}
+
 	options := &giraffe.CallOptions{
 		Metadata: map[string][]string{},
 	}
@@ -75,12 +93,11 @@ func (c *Client) Call(contract giraffe.Contract, req *http.Request, opts ...gira
 		}
 		req.URL.Host = addr
 	}
-	if c.Client == nil {
-		return http.DefaultClient.Do(req)
-	}
-	return c.Do(req)
+
+	return c.httpClient().Do(req)
 }
 
+//NewClient Client实例化函数
 func NewClient(addr string) giraffe.Client {
 	return &Client{
 		Client:      &http.Client{},
