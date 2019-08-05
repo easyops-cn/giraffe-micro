@@ -20,32 +20,6 @@ before_script:
 script:
   - go test -v -race -tags mock -covermode=atomic -coverprofile=coverage.out ./...
   - $GOPATH/bin/goveralls -coverprofile=coverage.out -service=travis-ci -repotoken $COVERALLS_TOKEN
-matrix:
-  include:
-    - os: linux
-      go: "1.12.x"
-      cache:
-        directories:
-          - $HOME/.cache/go-build # Cache the binaries
-          - $GOPATH/pkg/mod       # Cache the Go modules
-
-    - os: linux
-      go: "master"
-      cache:
-        directories:
-          - $HOME/.cache/go-build # Cache the binaries
-          - $GOPATH/pkg/mod       # Cache the Go modules
-
-    - os: osx
-      go: "1.12.x"
-      cache:
-        directories:
-          - $HOME/Library/Caches/go-build
-          - $HOME/gopath/pkg/mod
-
-    - os: osx
-      go: "master"
-      cache:
-        directories:
-          - $HOME/Library/Caches/go-build
-          - $HOME/gopath/pkg/mod
+cache:
+  directories:
+    - $GOPATH/pkg/mod # Cache the Go modules
