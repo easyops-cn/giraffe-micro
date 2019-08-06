@@ -104,6 +104,7 @@ func TestClient_Call(t *testing.T) {
 				rec.Body = bytes.NewBuffer([]byte("{\"code\":\"100014\"}"))
 				resp := rec.Result()
 				resp.Request = emptyRequest()
+				resp.Request.URL.Scheme = "http"
 				resp.Request.URL.Host = "192.168.100.162:8080"
 				resp.Request.Header.Add("host", "cmdb.easyops-only.com")
 				resp.Request.Header.Add("user", "index")

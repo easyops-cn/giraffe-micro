@@ -92,6 +92,7 @@ func (c *Client) Call(contract giraffe.Contract, req *http.Request, opts ...gira
 			return nil, err
 		}
 		req.URL.Host = addr
+		req.URL.Scheme = "http"
 	}
 
 	return c.httpClient().Do(req)
