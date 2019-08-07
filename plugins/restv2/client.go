@@ -23,6 +23,9 @@ type Client struct {
 	NameService giraffe.NameService
 }
 
+//ClientOption Client 配置函数
+type ClientOption func(c *Client)
+
 //Invoke 单次请求方法
 func (c *Client) Invoke(ctx context.Context, md *giraffe.MethodDesc, in interface{}, out interface{}, opts ...giraffe.CallOption) error {
 	req, err := c.middleware().NewRequest(md.HttpRule, in)
@@ -99,10 +102,33 @@ func (c *Client) Call(contract giraffe.Contract, req *http.Request, opts ...gira
 }
 
 //NewClient Client实例化函数
-func NewClient(addr string) giraffe.Client {
-	return &Client{
+func NewClient(opts ...ClientOption) giraffe.Client {
+	c := &Client{
 		Client:      &http.Client{},
 		Middleware:  DefaultMiddleware,
-		NameService: StaticAddress(addr),
+		NameService: nil,
+	}
+
+	for _, o := range opts {
+		o(c)
+	}
+
+	return c
+}
+
+//WithClient 注入 http.Client
+func WithClient(client *http.Client) ClientOption {
+	return func(c *Client) {
+		if client == nil {
+			client = &http.Client{}
+		}
+		c.Client = client
+	}
+}
+
+//WithNameService 注入 NameService
+func WithNameService(n giraffe.NameService) ClientOption {
+	return func(c *Client) {
+		c.NameService = n
 	}
 }

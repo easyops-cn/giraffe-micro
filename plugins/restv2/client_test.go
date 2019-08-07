@@ -8,6 +8,7 @@ import (
 	"net/http/httptest"
 	"reflect"
 	"testing"
+	"time"
 
 	giraffeproto "github.com/easyops-cn/go-proto-giraffe"
 	"github.com/go-test/deep"
@@ -405,36 +406,6 @@ func TestClient_middleware(t *testing.T) {
 	}
 }
 
-func TestNewClient(t *testing.T) {
-	type args struct {
-		addr string
-	}
-	tests := []struct {
-		name string
-		args args
-		want giraffe.Client
-	}{
-		{
-			name: "Test_HappyPath",
-			args: args{
-				addr: "192.168.100.162:8080",
-			},
-			want: &Client{
-				Client:      &http.Client{},
-				Middleware:  DefaultMiddleware,
-				NameService: StaticAddress("192.168.100.162:8080"),
-			},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := NewClient(tt.args.addr); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("NewClient() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
 func TestClient_httpClient(t *testing.T) {
 	type fields struct {
 		Client      *http.Client
@@ -463,6 +434,45 @@ func TestClient_httpClient(t *testing.T) {
 			}
 			if got := c.httpClient(); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("httpClient() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestNewClient(t *testing.T) {
+	type args struct {
+		opts []ClientOption
+	}
+	tests := []struct {
+		name string
+		args args
+		want giraffe.Client
+	}{
+		{
+			name: "Test_HappyPath",
+			args: args{
+				opts: []ClientOption{
+					WithClient(nil),
+					WithClient(&http.Client{
+						Timeout: 120 * time.Minute,
+					}),
+					WithNameService(nil),
+					WithNameService(StaticAddress("192.168.100.162:8080")),
+				},
+			},
+			want: &Client{
+				Client: &http.Client{
+					Timeout: 120 * time.Minute,
+				},
+				Middleware:  &middleware{},
+				NameService: StaticAddress("192.168.100.162:8080"),
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := NewClient(tt.args.opts...); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("NewClient() = %v, want %v", got, tt.want)
 			}
 		})
 	}
