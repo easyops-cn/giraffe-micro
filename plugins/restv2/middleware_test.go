@@ -5,91 +5,32 @@ import (
 	"errors"
 	"net/http"
 	"net/http/httptest"
+	"reflect"
 	"testing"
 
 	giraffeproto "github.com/easyops-cn/go-proto-giraffe"
-	"github.com/go-test/deep"
-	"github.com/gogo/protobuf/proto"
 	"github.com/gogo/protobuf/types"
 
 	"github.com/easyops-cn/giraffe-micro"
 )
-
-type getDetailRequest struct {
-	ObjectId             string   `protobuf:"bytes,1,opt,name=objectId,proto3" json:"objectId" form:"objectId"`
-	InstanceId           string   `protobuf:"bytes,2,opt,name=instanceId,proto3" json:"instanceId" form:"instanceId"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
-}
-
-func (m *getDetailRequest) Reset()         { *m = getDetailRequest{} }
-func (m *getDetailRequest) String() string { return proto.CompactTextString(m) }
-func (*getDetailRequest) ProtoMessage()    {}
-
-type deleteInstanceRequest struct {
-	ObjectId             string   `protobuf:"bytes,1,opt,name=objectId,proto3" json:"objectId" form:"objectId"`
-	InstanceId           string   `protobuf:"bytes,2,opt,name=instanceId,proto3" json:"instanceId" form:"instanceId"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
-}
-
-func (m *deleteInstanceRequest) Reset()         { *m = deleteInstanceRequest{} }
-func (m *deleteInstanceRequest) String() string { return proto.CompactTextString(m) }
-func (*deleteInstanceRequest) ProtoMessage()    {}
-
-type createInstanceRequest struct {
-	ObjectId             string        `protobuf:"bytes,1,opt,name=objectId,proto3" json:"objectId" form:"objectId"`
-	Instance             *types.Struct `protobuf:"bytes,2,opt,name=instance,proto3" json:"instance" form:"instance"`
-	XXX_NoUnkeyedLiteral struct{}      `json:"-"`
-	XXX_unrecognized     []byte        `json:"-"`
-	XXX_sizecache        int32         `json:"-"`
-}
-
-func (m *createInstanceRequest) Reset()         { *m = createInstanceRequest{} }
-func (m *createInstanceRequest) String() string { return proto.CompactTextString(m) }
-func (*createInstanceRequest) ProtoMessage()    {}
-
-type updateInstanceRequest struct {
-	ObjectId             string        `protobuf:"bytes,1,opt,name=objectId,proto3" json:"objectId" form:"objectId"`
-	InstanceId           string        `protobuf:"bytes,2,opt,name=instanceId,proto3" json:"instanceId" form:"instanceId"`
-	Instance             *types.Struct `protobuf:"bytes,3,opt,name=instance,proto3" json:"instance" form:"instance"`
-	XXX_NoUnkeyedLiteral struct{}      `json:"-"`
-	XXX_unrecognized     []byte        `json:"-"`
-	XXX_sizecache        int32         `json:"-"`
-}
-
-func (m *updateInstanceRequest) Reset()         { *m = updateInstanceRequest{} }
-func (m *updateInstanceRequest) String() string { return proto.CompactTextString(m) }
-func (*updateInstanceRequest) ProtoMessage()    {}
-
-type getDetailRequestWrapper struct {
-	Data                 []byte
-	ObjectId             string            `protobuf:"bytes,1,opt,name=objectId,proto3" json:"objectId" form:"objectId"`
-	InstanceId           string            `protobuf:"bytes,2,opt,name=instanceId,proto3" json:"instanceId" form:"instanceId"`
-	Wrapper              *getDetailRequest `protobuf:"bytes,2,opt,name=wrapper,proto3" json:"wrapper"`
-	XXX_NoUnkeyedLiteral struct{}          `json:"-"`
-	XXX_unrecognized     []byte            `json:"-"`
-	XXX_sizecache        int32             `json:"-"`
-}
-
-func (m *getDetailRequestWrapper) Reset()         { *m = getDetailRequestWrapper{} }
-func (m *getDetailRequestWrapper) String() string { return proto.CompactTextString(m) }
-func (m *getDetailRequestWrapper) ProtoMessage()  {}
 
 type errReadCloser struct{}
 
 func (*errReadCloser) Read(p []byte) (n int, err error) { return 0, errors.New("always error") }
 func (*errReadCloser) Close() error                     { return nil }
 
-func Test_middleware_NewRequest(t *testing.T) {
+func TestBaseMiddleware_NewRequest(t *testing.T) {
+	type fields struct {
+		Marshaler   Marshaler
+		Unmarshaler Unmarshaler
+	}
 	type args struct {
 		rule giraffe.HttpRule
 		in   interface{}
 	}
 	tests := []struct {
 		name    string
+		fields  fields
 		args    args
 		want    *http.Request
 		wantErr bool
@@ -295,6 +236,23 @@ func Test_middleware_NewRequest(t *testing.T) {
 			wantErr: true,
 		},
 		{
+			name: "Test_NoBodyField",
+			args: args{
+				rule: &giraffeproto.HttpRule{
+					Pattern: &giraffeproto.HttpRule_Post{
+						Post: "/v2/object/:objectId/instance",
+					},
+					Body: "instance2",
+				},
+				in: &createInstanceRequest{
+					ObjectId: "APP",
+					Instance: nil,
+				},
+			},
+			want:    nil,
+			wantErr: true,
+		},
+		{
 			name: "Test_WithWrongMethod",
 			args: args{
 				rule: &giraffeproto.HttpRule{
@@ -314,31 +272,111 @@ func Test_middleware_NewRequest(t *testing.T) {
 			want:    nil,
 			wantErr: true,
 		},
+		{
+			name: "Test_PostWithNilProtoMessage",
+			args: args{
+				rule: &giraffeproto.HttpRule{
+					Pattern: &giraffeproto.HttpRule_Post{
+						Post: "/",
+					},
+					Body: "",
+				},
+				in: (*createInstanceRequest)(nil),
+			},
+			want:    nil,
+			wantErr: true,
+		},
+		{
+			name: "Test_PostWithNilProtoMessage2",
+			args: args{
+				rule: &giraffeproto.HttpRule{
+					Pattern: &giraffeproto.HttpRule_Post{
+						Post: "/",
+					},
+					Body: "instance",
+				},
+				in: (*createInstanceRequest)(nil),
+			},
+			want:    nil,
+			wantErr: true,
+		},
+		{
+			name: "Test_GetDetailRequestWrapper",
+			args: args{
+				rule: &giraffeproto.HttpRule{
+					Pattern: &giraffeproto.HttpRule_Post{
+						Post: "/",
+					},
+					Body: "wrapper",
+				},
+				in: &getDetailRequestWrapper{
+					Wrapper: getDetailRequest{
+						ObjectId:   "APP",
+						InstanceId: "abc",
+					},
+				},
+			},
+			want: func() *http.Request {
+				r, _ := http.NewRequest("POST", "/", bytes.NewReader([]byte("{\"objectId\":\"APP\",\"instanceId\":\"abc\"}")))
+				r.Header.Add("content-type", "application/json")
+				return r
+			}(),
+			wantErr: false,
+		},
+		{
+			name: "Test_GetDetailRequestWrapper2",
+			args: args{
+				rule: &giraffeproto.HttpRule{
+					Pattern: &giraffeproto.HttpRule_Post{
+						Post: "/",
+					},
+					Body: "Data",
+				},
+				in: &getDetailRequestWrapper{
+					Data: []byte{},
+				},
+			},
+			want:    nil,
+			wantErr: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			m := &middleware{}
+			m := &BaseMiddleware{
+				Marshaler:   tt.fields.Marshaler,
+				Unmarshaler: tt.fields.Unmarshaler,
+			}
 			got, err := m.NewRequest(tt.args.rule, tt.args.in)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("NewRequest() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if diff := deep.Equal(got, tt.want); diff != nil {
-				t.Error(diff)
+			if got != nil {
+				got.GetBody = nil
+			}
+			if tt.want != nil {
+				tt.want.GetBody = nil
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("NewRequest() got = %v, want %v", got, tt.want)
 			}
 		})
 	}
 }
 
-func Test_middleware_ParseResponse(t *testing.T) {
+func TestBaseMiddleware_ParseResponse(t *testing.T) {
+	type fields struct {
+		Marshaler   Marshaler
+		Unmarshaler Unmarshaler
+	}
 	type args struct {
-		rule    giraffe.HttpRule
-		resp    *http.Response
-		respRec *httptest.ResponseRecorder
-		out     interface{}
+		rule giraffe.HttpRule
+		resp *http.Response
+		out  interface{}
 	}
 	tests := []struct {
 		name    string
+		fields  fields
 		args    args
 		want    interface{}
 		wantErr bool
@@ -349,7 +387,7 @@ func Test_middleware_ParseResponse(t *testing.T) {
 				rule: &giraffeproto.HttpRule{
 					ResponseBody: "data",
 				},
-				respRec: &httptest.ResponseRecorder{
+				resp: (&httptest.ResponseRecorder{
 					Code: http.StatusCreated,
 					Body: bytes.NewBuffer([]byte("{" +
 						"\"code\": 0," +
@@ -357,7 +395,7 @@ func Test_middleware_ParseResponse(t *testing.T) {
 						"\"message\": \"成功\"," +
 						"\"data\": {}" +
 						"}")),
-				},
+				}).Result(),
 				out: new(types.Struct),
 			},
 			want: &types.Struct{
@@ -369,10 +407,10 @@ func Test_middleware_ParseResponse(t *testing.T) {
 			name: "Test_UnexpectedMessage",
 			args: args{
 				rule: &giraffeproto.HttpRule{},
-				respRec: &httptest.ResponseRecorder{
+				resp: (&httptest.ResponseRecorder{
 					Code: http.StatusCreated,
 					Body: bytes.NewBuffer([]byte("[" + "]")),
-				},
+				}).Result(),
 				out: new(types.Struct),
 			},
 			want:    &types.Struct{},
@@ -384,9 +422,10 @@ func Test_middleware_ParseResponse(t *testing.T) {
 				rule: &giraffeproto.HttpRule{
 					ResponseBody: "data",
 				},
-				respRec: &httptest.ResponseRecorder{
+				resp: (&httptest.ResponseRecorder{
 					Code: http.StatusNotFound,
-				},
+					Body: nil,
+				}).Result(),
 				out: new(types.Struct),
 			},
 			want:    &types.Struct{},
@@ -412,27 +451,125 @@ func Test_middleware_ParseResponse(t *testing.T) {
 				rule: &giraffeproto.HttpRule{
 					ResponseBody: "data",
 				},
-				respRec: &httptest.ResponseRecorder{
+				resp: (&httptest.ResponseRecorder{
 					Code: http.StatusNoContent,
 					Body: bytes.NewBuffer([]byte("")),
-				},
+				}).Result(),
 				out: new(types.Struct),
 			},
 			want:    &types.Struct{},
 			wantErr: true,
 		},
+		{
+			name: "Test_WithNilOutput",
+			args: args{
+				rule: &giraffeproto.HttpRule{
+					ResponseBody: "data",
+				},
+				resp: (&httptest.ResponseRecorder{
+					Code: http.StatusNoContent,
+					Body: bytes.NewBuffer([]byte("")),
+				}).Result(),
+				out: nil,
+			},
+			want:    nil,
+			wantErr: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			m := &middleware{}
-			if tt.args.resp == nil {
-				tt.args.resp = tt.args.respRec.Result()
+			m := &BaseMiddleware{
+				Marshaler:   tt.fields.Marshaler,
+				Unmarshaler: tt.fields.Unmarshaler,
 			}
 			if err := m.ParseResponse(tt.args.rule, tt.args.resp, tt.args.out); (err != nil) != tt.wantErr {
 				t.Errorf("ParseResponse() error = %v, wantErr %v", err, tt.wantErr)
 			}
-			if diff := deep.Equal(tt.args.out, tt.want); diff != nil {
-				t.Error(diff)
+		})
+	}
+}
+
+func TestBaseMiddleware_unmarshaler(t *testing.T) {
+	type mockUnmarshaler struct {
+		Unmarshaler
+	}
+	type fields struct {
+		Marshaler   Marshaler
+		Unmarshaler Unmarshaler
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   Unmarshaler
+	}{
+		{
+			name: "Test_DefaultUnmarshaler",
+			fields: fields{
+				Marshaler:   nil,
+				Unmarshaler: nil,
+			},
+			want: defaultUnmarshaler,
+		},
+		{
+			name: "Test_MockUnmarshaler",
+			fields: fields{
+				Marshaler:   nil,
+				Unmarshaler: &mockUnmarshaler{},
+			},
+			want: &mockUnmarshaler{},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			m := &BaseMiddleware{
+				Marshaler:   tt.fields.Marshaler,
+				Unmarshaler: tt.fields.Unmarshaler,
+			}
+			if got := m.unmarshaler(); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("unmarshaler() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestBaseMiddleware_marshaler(t *testing.T) {
+	type mockMarshaler struct {
+		Marshaler
+	}
+	type fields struct {
+		Marshaler   Marshaler
+		Unmarshaler Unmarshaler
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   Marshaler
+	}{
+		{
+			name: "Test_DefaultMarshaler",
+			fields: fields{
+				Marshaler:   nil,
+				Unmarshaler: nil,
+			},
+			want: defaultMarshaler,
+		},
+		{
+			name: "Test_MockMarshaler",
+			fields: fields{
+				Marshaler:   &mockMarshaler{},
+				Unmarshaler: nil,
+			},
+			want: &mockMarshaler{},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			m := &BaseMiddleware{
+				Marshaler:   tt.fields.Marshaler,
+				Unmarshaler: tt.fields.Unmarshaler,
+			}
+			if got := m.marshaler(); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("marshaler() = %v, want %v", got, tt.want)
 			}
 		})
 	}

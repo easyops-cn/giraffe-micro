@@ -464,7 +464,7 @@ func TestNewClient(t *testing.T) {
 				Client: &http.Client{
 					Timeout: 120 * time.Minute,
 				},
-				Middleware:  &middleware{},
+				Middleware:  &BaseMiddleware{},
 				NameService: StaticAddress("192.168.100.162:8080"),
 			},
 		},
