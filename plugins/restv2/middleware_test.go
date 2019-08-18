@@ -12,6 +12,7 @@ import (
 	"github.com/gogo/protobuf/types"
 
 	"github.com/easyops-cn/giraffe-micro"
+	"github.com/easyops-cn/giraffe-micro/test/mock/mock_restv2"
 )
 
 type errReadCloser struct{}
@@ -44,7 +45,7 @@ func TestBaseMiddleware_NewRequest(t *testing.T) {
 					},
 					Body: "",
 				},
-				in: &getDetailRequest{
+				in: &mock_restv2.GetDetailRequest{
 					ObjectId:   "APP",
 					InstanceId: "abc",
 				},
@@ -64,7 +65,7 @@ func TestBaseMiddleware_NewRequest(t *testing.T) {
 					},
 					Body: "",
 				},
-				in: &deleteInstanceRequest{
+				in: &mock_restv2.DeleteInstanceRequest{
 					ObjectId:   "APP",
 					InstanceId: "abc",
 				},
@@ -84,7 +85,7 @@ func TestBaseMiddleware_NewRequest(t *testing.T) {
 					},
 					Body: "instance",
 				},
-				in: &createInstanceRequest{
+				in: &mock_restv2.CreateInstanceRequest{
 					ObjectId: "APP",
 					Instance: &types.Struct{
 						Fields: map[string]*types.Value{
@@ -130,7 +131,7 @@ func TestBaseMiddleware_NewRequest(t *testing.T) {
 					},
 					Body: "instance",
 				},
-				in: &updateInstanceRequest{
+				in: &mock_restv2.UpdateInstanceRequest{
 					ObjectId:   "APP",
 					InstanceId: "abc",
 					Instance: &types.Struct{
@@ -156,7 +157,7 @@ func TestBaseMiddleware_NewRequest(t *testing.T) {
 					},
 					Body: "instance",
 				},
-				in: &updateInstanceRequest{
+				in: &mock_restv2.UpdateInstanceRequest{
 					ObjectId:   "APP",
 					InstanceId: "abc",
 					Instance: &types.Struct{
@@ -177,7 +178,7 @@ func TestBaseMiddleware_NewRequest(t *testing.T) {
 			name: "Test_MethodNotDefined",
 			args: args{
 				rule: &giraffeproto.HttpRule{},
-				in:   &updateInstanceRequest{},
+				in:   &mock_restv2.UpdateInstanceRequest{},
 			},
 			want:    nil,
 			wantErr: true,
@@ -186,7 +187,7 @@ func TestBaseMiddleware_NewRequest(t *testing.T) {
 			name: "Test_HttpRuleNotDefined",
 			args: args{
 				rule: nil,
-				in:   &updateInstanceRequest{},
+				in:   &mock_restv2.UpdateInstanceRequest{},
 			},
 			want:    nil,
 			wantErr: true,
@@ -200,7 +201,7 @@ func TestBaseMiddleware_NewRequest(t *testing.T) {
 					},
 					Body: "",
 				},
-				in: (*getDetailRequest)(nil),
+				in: (*mock_restv2.GetDetailRequest)(nil),
 			},
 			want:    nil,
 			wantErr: true,
@@ -227,7 +228,7 @@ func TestBaseMiddleware_NewRequest(t *testing.T) {
 					},
 					Body: "instance",
 				},
-				in: &createInstanceRequest{
+				in: &mock_restv2.CreateInstanceRequest{
 					ObjectId: "APP",
 					Instance: nil,
 				},
@@ -244,7 +245,7 @@ func TestBaseMiddleware_NewRequest(t *testing.T) {
 					},
 					Body: "instance2",
 				},
-				in: &createInstanceRequest{
+				in: &mock_restv2.CreateInstanceRequest{
 					ObjectId: "APP",
 					Instance: nil,
 				},
@@ -264,7 +265,7 @@ func TestBaseMiddleware_NewRequest(t *testing.T) {
 					},
 					Body: "",
 				},
-				in: &getDetailRequest{
+				in: &mock_restv2.GetDetailRequest{
 					ObjectId:   "APP",
 					InstanceId: "abc",
 				},
@@ -281,7 +282,7 @@ func TestBaseMiddleware_NewRequest(t *testing.T) {
 					},
 					Body: "",
 				},
-				in: (*createInstanceRequest)(nil),
+				in: (*mock_restv2.CreateInstanceRequest)(nil),
 			},
 			want:    nil,
 			wantErr: true,
@@ -295,7 +296,7 @@ func TestBaseMiddleware_NewRequest(t *testing.T) {
 					},
 					Body: "instance",
 				},
-				in: (*createInstanceRequest)(nil),
+				in: (*mock_restv2.CreateInstanceRequest)(nil),
 			},
 			want:    nil,
 			wantErr: true,
@@ -309,8 +310,8 @@ func TestBaseMiddleware_NewRequest(t *testing.T) {
 					},
 					Body: "wrapper",
 				},
-				in: &getDetailRequestWrapper{
-					Wrapper: getDetailRequest{
+				in: &mock_restv2.GetDetailRequestWrapper{
+					Wrapper: mock_restv2.GetDetailRequest{
 						ObjectId:   "APP",
 						InstanceId: "abc",
 					},
@@ -332,7 +333,7 @@ func TestBaseMiddleware_NewRequest(t *testing.T) {
 					},
 					Body: "Data",
 				},
-				in: &getDetailRequestWrapper{
+				in: &mock_restv2.GetDetailRequestWrapper{
 					Data: []byte{},
 				},
 			},

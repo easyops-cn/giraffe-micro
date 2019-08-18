@@ -15,6 +15,7 @@ import (
 	"github.com/gogo/protobuf/types"
 
 	"github.com/easyops-cn/giraffe-micro"
+	"github.com/easyops-cn/giraffe-micro/test/mock/mock_restv2"
 )
 
 type errNameService struct{}
@@ -223,7 +224,7 @@ func TestClient_Invoke(t *testing.T) {
 						},
 					},
 				},
-				in: &getDetailRequest{
+				in: &mock_restv2.GetDetailRequest{
 					ObjectId:   "HOST",
 					InstanceId: "xxx",
 				},
@@ -258,7 +259,7 @@ func TestClient_Invoke(t *testing.T) {
 						Version: "1.0",
 					},
 				},
-				in:   &getDetailRequest{},
+				in:   &mock_restv2.GetDetailRequest{},
 				out:  &types.Struct{},
 				opts: nil,
 			},
@@ -290,7 +291,7 @@ func TestClient_Invoke(t *testing.T) {
 						},
 					},
 				},
-				in: &getDetailRequest{
+				in: &mock_restv2.GetDetailRequest{
 					ObjectId:   "HOST",
 					InstanceId: "xxx",
 				},
