@@ -49,7 +49,7 @@ func (c *Client) Invoke(ctx context.Context, md *giraffe.MethodDesc, in interfac
 }
 
 //NewStream 流式请求方法(未实现)
-func (c *Client) NewStream(ctx context.Context, sd *giraffe.StreamDesc, opts ...giraffe.CallOption) (giraffe.ClientStream, error) {
+func (c *Client) NewStream(context.Context, *giraffe.StreamDesc, ...giraffe.CallOption) (giraffe.ClientStream, error) {
 	return nil, errors.New("not supported")
 }
 
@@ -102,7 +102,7 @@ func (c *Client) Call(contract giraffe.Contract, req *http.Request, opts ...gira
 }
 
 //NewClient Client实例化函数
-func NewClient(opts ...ClientOption) giraffe.Client {
+func NewClient(opts ...ClientOption) *Client {
 	c := &Client{
 		Client:      &http.Client{},
 		Middleware:  DefaultMiddleware,
