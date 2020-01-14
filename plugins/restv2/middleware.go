@@ -128,23 +128,43 @@ func (m *BaseMiddleware) marshalDataField(out io.Writer, name string, pb proto.M
 	if pb == nil || (v.Kind() == reflect.Ptr && v.IsNil()) {
 		return errors.New("func marshalDataField called with nil")
 	}
+	var field reflect.Value
 	for i, prop := range proto.GetProperties(v.Elem().Type()).Prop {
-		if prop.OrigName != name {
-			continue
+		if prop.OrigName == name {
+			field = v.Elem().Field(i)
+			break
 		}
-		field := v.Elem().Field(i)
-		if field.Kind() == reflect.Struct {
-			nv := reflect.New(field.Type())
-			nv.Elem().Set(field)
-			field = nv
-		}
-		pb, ispb := field.Interface().(proto.Message)
-		if !ispb {
-			return fmt.Errorf("data field %s was not proto.Message", strconv.Quote(name))
-		}
-		return m.marshaler().Marshal(out, pb)
 	}
-	return fmt.Errorf("data field %s was not found", strconv.Quote(name))
+	if !field.IsValid() {
+		return fmt.Errorf("data field %s was not found", strconv.Quote(name))
+	}
+	pbType := reflect.TypeOf((*proto.Message)(nil)).Elem()
+	if field.Kind() == reflect.Ptr && field.Type().Implements(pbType) {
+		return m.marshaler().Marshal(out, field.Interface().(proto.Message))
+	} else if field.Kind() == reflect.Struct && reflect.PtrTo(field.Type()).Implements(pbType) {
+		return m.marshaler().Marshal(out, field.Addr().Interface().(proto.Message))
+	} else if field.Kind() == reflect.Slice && field.Type().Elem().Implements(pbType) {
+		s := make([][]byte, 0, field.Len())
+		var err error
+		for i := 0; i < field.Len(); i++ {
+			if err == nil {
+				buff := bytes.NewBuffer([]byte{})
+				err = m.marshaler().Marshal(buff, field.Index(i).Interface().(proto.Message))
+				s = append(s, buff.Bytes())
+			}
+		}
+		if err == nil {
+			_, err = out.Write([]byte{'['})
+		}
+		if err == nil {
+			_, err = out.Write(bytes.Join(s, []byte{','}))
+		}
+		if err == nil {
+			_, err = out.Write([]byte{']'})
+		}
+		return err
+	}
+	return fmt.Errorf("data field %s was not proto.Message", strconv.Quote(name))
 }
 
 func (m *BaseMiddleware) unmarshaler() Unmarshaler {

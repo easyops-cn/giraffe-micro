@@ -67,3 +67,14 @@ type GetDetailRequestWrapper struct {
 func (m *GetDetailRequestWrapper) Reset()         { *m = GetDetailRequestWrapper{} }
 func (m *GetDetailRequestWrapper) String() string { return proto.CompactTextString(m) }
 func (m *GetDetailRequestWrapper) ProtoMessage()  {}
+
+type MultiCreateInstanceRequest struct {
+	Instances            []*CreateInstanceRequest `protobuf:"bytes,1,opt,name=instances,proto3" json:"instances" form:"instances"`
+	XXX_NoUnkeyedLiteral struct{}                 `json:"-"`
+	XXX_unrecognized     []byte                   `json:"-"`
+	XXX_sizecache        int32                    `json:"-"`
+}
+
+func (m *MultiCreateInstanceRequest) Reset()         { *m = MultiCreateInstanceRequest{} }
+func (m *MultiCreateInstanceRequest) String() string { return proto.CompactTextString(m) }
+func (m *MultiCreateInstanceRequest) ProtoMessage()  {}

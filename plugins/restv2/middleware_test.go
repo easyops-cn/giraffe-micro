@@ -340,6 +340,42 @@ func TestBaseMiddleware_NewRequest(t *testing.T) {
 			want:    nil,
 			wantErr: true,
 		},
+		{
+			args: args{
+				rule: &giraffeproto.HttpRule{
+					Pattern: &giraffeproto.HttpRule_Post{
+						Post: "/v2/import/instance",
+					},
+					Body: "instances",
+				},
+				in: &mock_restv2.MultiCreateInstanceRequest{
+					Instances: []*mock_restv2.CreateInstanceRequest{
+						{
+							ObjectId: "APP",
+							Instance: &types.Struct{
+								Fields: map[string]*types.Value{
+									"name": {Kind: &types.Value_StringValue{StringValue: "abc"}},
+								},
+							},
+						},
+						{
+							ObjectId: "APP",
+							Instance: &types.Struct{
+								Fields: map[string]*types.Value{
+									"name": {Kind: &types.Value_StringValue{StringValue: "def"}},
+								},
+							},
+						},
+					},
+				},
+			},
+			want: func() *http.Request {
+				r, _ := http.NewRequest("POST", "/v2/import/instance", bytes.NewReader([]byte("[{\"objectId\":\"APP\",\"instance\":{\"name\":\"abc\"}},{\"objectId\":\"APP\",\"instance\":{\"name\":\"def\"}}]")))
+				r.Header.Add("Content-Type", "application/json")
+				return r
+			}(),
+			wantErr: false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
