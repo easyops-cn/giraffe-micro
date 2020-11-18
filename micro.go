@@ -44,8 +44,8 @@ type ServiceStream interface {
 
 //NameService 名字服务接口
 type NameService interface {
-	GetAddress(contract Contract) (string, error)
-	GetAllAddresses(contract Contract) ([]string, error)
+	GetAddress(ctx context.Context, contract Contract) (string, error)
+	GetAllAddresses(ctx context.Context, contract Contract) ([]string, error)
 }
 
 //Contract 契约定义接口

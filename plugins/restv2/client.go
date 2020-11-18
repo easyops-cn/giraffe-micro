@@ -90,7 +90,7 @@ func (c *Client) Call(contract giraffe.Contract, req *http.Request, opts ...gira
 	}
 
 	if c.NameService != nil {
-		addr, err := c.NameService.GetAddress(contract)
+		addr, err := c.NameService.GetAddress(req.Context(), contract)
 		if err != nil {
 			return nil, err
 		}
