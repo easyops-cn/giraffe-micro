@@ -1,9 +1,9 @@
 module github.com/easyops-cn/giraffe-micro
 
-go 1.12
+go 1.13
 
 require (
-	github.com/easyops-cn/go-proto-giraffe v0.1.2
-	github.com/go-test/deep v1.0.2
-	github.com/gogo/protobuf v1.2.1
+	github.com/easyops-cn/go-proto-giraffe v0.2.0
+	github.com/go-test/deep v1.0.7
+	github.com/gogo/protobuf v1.3.1
 )

@@ -1,6 +1,7 @@
 package restv2
 
 import (
+	"context"
 	"reflect"
 	"testing"
 
@@ -28,7 +29,7 @@ func TestStaticAddress_GetAddress(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := tt.s.GetAddress(tt.args.contract)
+			got, err := tt.s.GetAddress(context.Background(), tt.args.contract)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetAddress() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -61,7 +62,7 @@ func TestStaticAddress_GetAllAddresses(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := tt.s.GetAllAddresses(tt.args.contract)
+			got, err := tt.s.GetAllAddresses(context.Background(), tt.args.contract)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetAllAddresses() error = %v, wantErr %v", err, tt.wantErr)
 				return

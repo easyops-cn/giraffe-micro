@@ -20,11 +20,11 @@ import (
 
 type errNameService struct{}
 
-func (e *errNameService) GetAddress(contract giraffe.Contract) (string, error) {
+func (e *errNameService) GetAddress(ctx context.Context, contract giraffe.Contract) (string, error) {
 	return "", errors.New("always failed")
 }
 
-func (e *errNameService) GetAllAddresses(contract giraffe.Contract) ([]string, error) {
+func (e *errNameService) GetAllAddresses(ctx context.Context, contract giraffe.Contract) ([]string, error) {
 	return nil, errors.New("always failed")
 }
 
