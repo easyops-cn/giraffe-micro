@@ -33,6 +33,8 @@ func (c *Client) Invoke(ctx context.Context, md *giraffe.MethodDesc, in interfac
 		return err
 	}
 
+	req.Header.Set("giraffe-contract-name", md.Contract.GetName())
+	req.Header.Set("giraffe-contract-version", md.Contract.GetVersion())
 	req = req.WithContext(ctx)
 	resp, err := c.Call(md.Contract, req, opts...)
 	if resp != nil {
