@@ -1,6 +1,6 @@
 module github.com/easyops-cn/giraffe-micro
 
-go 1.13
+go 1.19
 
 require (
 	github.com/easyops-cn/go-proto-giraffe v0.2.0
