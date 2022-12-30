@@ -88,7 +88,6 @@ func TestClient_Call(t *testing.T) {
 				},
 				Middleware:  DefaultMiddleware,
 				NameService: StaticAddress("192.168.100.162:8080"),
-				Retry:       1,
 			},
 			args: args{
 				contract: &giraffeproto.Contract{

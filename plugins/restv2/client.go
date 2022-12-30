@@ -93,7 +93,11 @@ func (c *Client) Call(contract giraffe.Contract, req *http.Request, opts ...gira
 		req.Host = hostname
 	}
 
-	for i := int8(0); i < c.Retry; i++ {
+	retry := c.Retry
+	if retry <= 0 {
+		retry = 1
+	}
+	for i := int8(0); i < retry; i++ {
 		if c.NameService != nil {
 			req.URL.Scheme = "http"
 			req.URL.Host, err = c.NameService.GetAddress(req.Context(), contract)
