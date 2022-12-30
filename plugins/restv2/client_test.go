@@ -64,6 +64,7 @@ func TestClient_Call(t *testing.T) {
 		Client      *http.Client
 		Middleware  Middleware
 		NameService giraffe.NameService
+		Retry       int8
 	}
 	type args struct {
 		contract giraffe.Contract
@@ -87,6 +88,7 @@ func TestClient_Call(t *testing.T) {
 				},
 				Middleware:  DefaultMiddleware,
 				NameService: StaticAddress("192.168.100.162:8080"),
+				Retry:       1,
 			},
 			args: args{
 				contract: &giraffeproto.Contract{
@@ -126,6 +128,7 @@ func TestClient_Call(t *testing.T) {
 				},
 				Middleware:  DefaultMiddleware,
 				NameService: &errNameService{},
+				Retry:       1,
 			},
 			args: args{
 				contract: &giraffeproto.Contract{
@@ -148,6 +151,7 @@ func TestClient_Call(t *testing.T) {
 				},
 				Middleware:  DefaultMiddleware,
 				NameService: &errNameService{},
+				Retry:       1,
 			},
 			args: args{
 				contract: &giraffeproto.Contract{
@@ -167,6 +171,7 @@ func TestClient_Call(t *testing.T) {
 				Client:      tt.fields.Client,
 				Middleware:  tt.fields.Middleware,
 				NameService: tt.fields.NameService,
+				Retry:       tt.fields.Retry,
 			}
 			got, err := c.Call(tt.args.contract, tt.args.req, tt.args.opts...)
 			if (err != nil) != tt.wantErr {
@@ -185,6 +190,7 @@ func TestClient_Invoke(t *testing.T) {
 		Client      *http.Client
 		Middleware  Middleware
 		NameService giraffe.NameService
+		Retry       int8
 	}
 	type args struct {
 		ctx  context.Context
@@ -210,6 +216,7 @@ func TestClient_Invoke(t *testing.T) {
 				},
 				Middleware:  DefaultMiddleware,
 				NameService: StaticAddress("192.168.100.162:8080"),
+				Retry:       1,
 			},
 			args: args{
 				ctx: context.Background(),
@@ -250,6 +257,7 @@ func TestClient_Invoke(t *testing.T) {
 				},
 				Middleware:  DefaultMiddleware,
 				NameService: StaticAddress("192.168.100.162:8080"),
+				Retry:       1,
 			},
 			args: args{
 				ctx: context.Background(),
@@ -277,6 +285,7 @@ func TestClient_Invoke(t *testing.T) {
 				},
 				Middleware:  DefaultMiddleware,
 				NameService: StaticAddress("192.168.100.162:8080"),
+				Retry:       1,
 			},
 			args: args{
 				ctx: context.Background(),
@@ -308,6 +317,7 @@ func TestClient_Invoke(t *testing.T) {
 				Client:      tt.fields.Client,
 				Middleware:  tt.fields.Middleware,
 				NameService: tt.fields.NameService,
+				Retry:       tt.fields.Retry,
 			}
 			err := c.Invoke(tt.args.ctx, tt.args.md, tt.args.in, tt.args.out, tt.args.opts...)
 			got := tt.args.out
@@ -467,6 +477,7 @@ func TestNewClient(t *testing.T) {
 				},
 				Middleware:  &BaseMiddleware{},
 				NameService: StaticAddress("192.168.100.162:8080"),
+				Retry:       1,
 			},
 		},
 	}
