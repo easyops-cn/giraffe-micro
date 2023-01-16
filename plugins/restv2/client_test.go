@@ -18,14 +18,18 @@ import (
 	"github.com/easyops-cn/giraffe-micro/test/mock/mock_restv2"
 )
 
-type errNameService struct{}
+type errNameService struct {
+	addr  string
+	addrs []string
+	err   error
+}
 
 func (e *errNameService) GetAddress(ctx context.Context, contract giraffe.Contract) (string, error) {
-	return "", errors.New("always failed")
+	return e.addr, e.err
 }
 
 func (e *errNameService) GetAllAddresses(ctx context.Context, contract giraffe.Contract) ([]string, error) {
-	return nil, errors.New("always failed")
+	return e.addrs, e.err
 }
 
 type mockTransport struct {
@@ -124,8 +128,10 @@ func TestClient_Call(t *testing.T) {
 						listen: "192.168.100.162:8080",
 					},
 				},
-				Middleware:  DefaultMiddleware,
-				NameService: &errNameService{},
+				Middleware: DefaultMiddleware,
+				NameService: &errNameService{
+					err: errors.New("mock error"),
+				},
 			},
 			args: args{
 				contract: &giraffeproto.Contract{
@@ -146,8 +152,10 @@ func TestClient_Call(t *testing.T) {
 						listen: "192.168.100.162:8080",
 					},
 				},
-				Middleware:  DefaultMiddleware,
-				NameService: &errNameService{},
+				Middleware: DefaultMiddleware,
+				NameService: &errNameService{
+					err: errors.New("mock error"),
+				},
 			},
 			args: args{
 				contract: &giraffeproto.Contract{
@@ -467,6 +475,9 @@ func TestNewClient(t *testing.T) {
 				},
 				Middleware:  &BaseMiddleware{},
 				NameService: StaticAddress("192.168.100.162:8080"),
+				retryConf: RetryConfig{
+					RetryInterval: defaultWaitDuration,
+				},
 			},
 		},
 	}
@@ -474,6 +485,147 @@ func TestNewClient(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := NewClient(tt.args.opts...); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("NewClient() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestWithRetryConfig(t *testing.T) {
+	type args struct {
+		conf RetryConfig
+	}
+	tests := []struct {
+		name string
+		args args
+	}{
+		{
+			name: "happy path",
+			args: args{
+				conf: RetryConfig{},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := WithRetryConfig(tt.args.conf)
+			got(&Client{})
+		})
+	}
+}
+
+func TestClient_getAllAddressesWithNS(t *testing.T) {
+	type mockConfig struct {
+		nameServiceNil bool
+		getErr         bool
+	}
+	tests := []struct {
+		name          string
+		mockConfig    mockConfig
+		wantAddresses []string
+		wantErr       bool
+	}{
+		{
+			name: "NameService nil",
+			mockConfig: mockConfig{
+				nameServiceNil: true,
+			},
+			wantErr: false,
+		},
+		{
+			name: "error path",
+			mockConfig: mockConfig{
+				getErr: true,
+			},
+			wantErr: true,
+		},
+		{
+			name: "happy path",
+			mockConfig: mockConfig{
+				getErr: false,
+			},
+			wantErr:       false,
+			wantAddresses: []string{"127.0.0.1"},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var nameService giraffe.NameService
+			if !tt.mockConfig.nameServiceNil {
+				if tt.mockConfig.getErr {
+					nameService = &errNameService{
+						err: errors.New("mock error"),
+					}
+				} else {
+					nameService = &errNameService{
+						addrs: []string{"127.0.0.1"},
+					}
+				}
+
+			}
+			c := &Client{
+				NameService: nameService,
+			}
+			gotAddresses, err := c.getAllAddressesWithNS(nil, nil)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("getAllAddressesWithNS() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(gotAddresses, tt.wantAddresses) {
+				t.Errorf("getAllAddressesWithNS() gotAddresses = %v, want %v", gotAddresses, tt.wantAddresses)
+			}
+		})
+	}
+}
+
+func TestClient_sendWithENS(t *testing.T) {
+	req1, _ := http.NewRequest("POST", "http://127.0.0.1:80", bytes.NewReader([]byte("Hello")))
+
+	type fields struct {
+		retryConf RetryConfig
+	}
+	type args struct {
+		req      *http.Request
+		contract giraffe.Contract
+	}
+	tests := []struct {
+		name     string
+		fields   fields
+		args     args
+		wantResp *http.Response
+		wantErr  bool
+	}{
+		{
+			name: "retry fail",
+			fields: fields{
+				retryConf: RetryConfig{
+					Enabled: true,
+					Retries: 2,
+				},
+			},
+			args: args{
+				req:      req1,
+				contract: nil,
+			},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			mockNameService := &errNameService{
+				addrs: []string{"127.0.0.1:80"},
+			}
+			c := &Client{
+				Client:      http.DefaultClient,
+				NameService: mockNameService,
+				retryConf:   tt.fields.retryConf,
+			}
+			gotResp, err := c.sendWithENS(tt.args.req, tt.args.contract)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("sendWithENS() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(gotResp, tt.wantResp) {
+				t.Errorf("sendWithENS() gotResp = %v, want %v", gotResp, tt.wantResp)
 			}
 		})
 	}
