@@ -110,27 +110,39 @@ func (c *Client) sendWithENS(req *http.Request, contract giraffe.Contract) (resp
 
 	// 备份 http body
 	var originalBody []byte
+	req.URL.Scheme = "http"
 	if req != nil && req.Body != nil {
 		originalBody, _ = copyBody(req)
 	}
+
 	// 如果 retryConf.Enabled 为false, 获取 sendCount 的值为1，表示只执行一次，不会重试
 	sendCount := c.retryConf.getSendCount()
+
 	retryInterval := c.retryConf.RetryInterval
-	req.URL.Scheme = "http"
+	addr := addrList[0]
 	i := 0
+	unavailableRetry := false
 	for ; i < sendCount; i++ {
-		// 重试时，如果重试服务的节点是单节点, 那么需要休眠一段时间再执行
-		if i > 0 && len(addrList) == 1 {
+		// 当i为1时，表示已经是重试循环, 需要根据情况进行等待
+		// 当 单节点连接被拒绝重试 或者 503重试, 需要等待一段时间后再发起请求
+		// 多节点下，连接被拒绝，就不等待了，直接访问其他节点
+		if i > 0 && (len(addrList) <= 0 || unavailableRetry) {
 			time.Sleep(retryInterval)
 		}
+		// 服务重试，以轮询策略为节点选择策略
+		if addr == "" {
+			addr = addrList[i%len(addrList)]
+		}
 		// 根据执行次数, 轮询节点
-		req.URL.Host = addrList[i%len(addrList)]
+		req.URL.Host = addr
 
 		resp, err = c.httpClient().Do(req)
 		if err != nil {
 			// connection refuse 重试机制
 			if errors.Is(err, syscall.ECONNREFUSED) {
 				resetBody(req, originalBody)
+				addr = "" // 当前节点的访问被拒绝, addr置空, 获取其他节点
+				unavailableRetry = false
 				continue
 			}
 			return // 非 connection refuse 错误直接退出
@@ -149,6 +161,7 @@ func (c *Client) sendWithENS(req *http.Request, contract giraffe.Contract) (resp
 		// Retry-After单位为秒: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Retry-After
 		// TODO 对获取的retryAfter进行校验，不要让它因为错误的设置而等待超长的时间
 		retryInterval = time.Duration(retryAfter) * time.Second
+		unavailableRetry = true
 		_ = resp.Body.Close() // 重试, 所以释放当前fd
 		resetBody(req, originalBody)
 	}

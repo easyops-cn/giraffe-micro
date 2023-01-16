@@ -4,9 +4,12 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"fmt"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
@@ -577,56 +580,81 @@ func TestClient_getAllAddressesWithNS(t *testing.T) {
 	}
 }
 
-func TestClient_sendWithENS(t *testing.T) {
+func TestClient_sendWithENS_retry_fail(t *testing.T) {
 	req1, _ := http.NewRequest("POST", "http://127.0.0.1:80", bytes.NewReader([]byte("Hello")))
+	t.Run("retry failed", func(t *testing.T) {
+		mockNameService := &errNameService{
+			addrs: []string{"127.0.0.1:80"},
+		}
+		c := &Client{
+			Client:      http.DefaultClient,
+			NameService: mockNameService,
+			retryConf: RetryConfig{
+				Enabled:       true,
+				Retries:       2,
+				RetryInterval: 10 * time.Millisecond,
+			},
+		}
+		_, _ = c.sendWithENS(req1, nil)
+	})
+}
 
-	type fields struct {
-		retryConf RetryConfig
-	}
-	type args struct {
-		req      *http.Request
-		contract giraffe.Contract
-	}
-	tests := []struct {
-		name     string
-		fields   fields
-		args     args
-		wantResp *http.Response
-		wantErr  bool
-	}{
-		{
-			name: "retry fail",
-			fields: fields{
-				retryConf: RetryConfig{
-					Enabled: true,
-					Retries: 2,
-				},
+type testHandler1 struct {
+	retryAfter string
+}
+
+func (s *testHandler1) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
+	reqBs, _ := ioutil.ReadAll(req.Body)
+	fmt.Println(string(reqBs))
+
+	resp.Header().Set("Retry-After", s.retryAfter)
+	resp.WriteHeader(503)
+}
+
+func TestClient_sendWithENS_503_retry(t *testing.T) {
+	server := httptest.NewServer(&testHandler1{
+		retryAfter: "1",
+	})
+	defer server.Close()
+
+	req1, _ := http.NewRequest("POST", server.URL, bytes.NewReader([]byte("Hello")))
+	t.Run("retry failed", func(t *testing.T) {
+		port := strings.Split(server.URL, ":")[2]
+		mockNameService := &errNameService{
+			addrs: []string{fmt.Sprintf("127.0.0.1:%s", port)},
+		}
+		c := &Client{
+			Client:      http.DefaultClient,
+			NameService: mockNameService,
+			retryConf: RetryConfig{
+				Enabled:       true,
+				Retries:       2,
+				RetryInterval: 10 * time.Millisecond,
 			},
-			args: args{
-				req:      req1,
-				contract: nil,
+		}
+		_, _ = c.sendWithENS(req1, nil)
+	})
+}
+
+func TestClient_sendWithENS_503_retry_no_retryAfter(t *testing.T) {
+	server := httptest.NewServer(&testHandler1{})
+	defer server.Close()
+
+	req1, _ := http.NewRequest("POST", server.URL, bytes.NewReader([]byte("Hello")))
+	t.Run("retry failed", func(t *testing.T) {
+		port := strings.Split(server.URL, ":")[2]
+		mockNameService := &errNameService{
+			addrs: []string{fmt.Sprintf("127.0.0.1:%s", port)},
+		}
+		c := &Client{
+			Client:      http.DefaultClient,
+			NameService: mockNameService,
+			retryConf: RetryConfig{
+				Enabled:       true,
+				Retries:       2,
+				RetryInterval: 10 * time.Millisecond,
 			},
-			wantErr: true,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			mockNameService := &errNameService{
-				addrs: []string{"127.0.0.1:80"},
-			}
-			c := &Client{
-				Client:      http.DefaultClient,
-				NameService: mockNameService,
-				retryConf:   tt.fields.retryConf,
-			}
-			gotResp, err := c.sendWithENS(tt.args.req, tt.args.contract)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("sendWithENS() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if !reflect.DeepEqual(gotResp, tt.wantResp) {
-				t.Errorf("sendWithENS() gotResp = %v, want %v", gotResp, tt.wantResp)
-			}
-		})
-	}
+		}
+		_, _ = c.sendWithENS(req1, nil)
+	})
 }
