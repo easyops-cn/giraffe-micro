@@ -6,6 +6,7 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"sort"
 	"strconv"
 	"syscall"
 	"time"
@@ -103,7 +104,7 @@ func (c *Client) Call(contract giraffe.Contract, req *http.Request, opts ...gira
 
 func (c *Client) sendWithENS(req *http.Request, contract giraffe.Contract) (resp *http.Response, err error) {
 	// ENS服务发现
-	addrList, err := c.getAllAddressesWithNS(req.Context(), contract)
+	addrList, err := c.getAllAddressesWithENS(req.Context(), contract)
 	if err != nil {
 		return
 	}
@@ -168,7 +169,7 @@ func (c *Client) sendWithENS(req *http.Request, contract giraffe.Contract) (resp
 	return
 }
 
-func (c *Client) getAllAddressesWithNS(ctx context.Context, contract giraffe.Contract) (addresses []string, err error) {
+func (c *Client) getAllAddressesWithENS(ctx context.Context, contract giraffe.Contract) (addresses []string, err error) {
 	if c.NameService == nil {
 		return
 	}
@@ -176,6 +177,8 @@ func (c *Client) getAllAddressesWithNS(ctx context.Context, contract giraffe.Con
 	if err != nil {
 		return
 	}
+	// 排序
+	sort.Strings(addresses)
 	return
 }
 
