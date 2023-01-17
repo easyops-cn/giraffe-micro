@@ -478,7 +478,7 @@ func TestNewClient(t *testing.T) {
 				},
 				Middleware:  &BaseMiddleware{},
 				NameService: StaticAddress("192.168.100.162:8080"),
-				retryConf: RetryConfig{
+				RetryConf: RetryConfig{
 					RetryInterval: defaultWaitDuration,
 				},
 			},
@@ -568,7 +568,7 @@ func TestClient_getAllAddressesWithNS(t *testing.T) {
 			c := &Client{
 				NameService: nameService,
 			}
-			gotAddresses, err := c.getAllAddressesWithNS(nil, nil)
+			gotAddresses, err := c.getAllAddressesWithENS(nil, nil)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("getAllAddressesWithNS() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -589,7 +589,7 @@ func TestClient_sendWithENS_retry_fail(t *testing.T) {
 		c := &Client{
 			Client:      http.DefaultClient,
 			NameService: mockNameService,
-			retryConf: RetryConfig{
+			RetryConf: RetryConfig{
 				Enabled:       true,
 				Retries:       2,
 				RetryInterval: 10 * time.Millisecond,
@@ -626,7 +626,7 @@ func TestClient_sendWithENS_503_retry(t *testing.T) {
 		c := &Client{
 			Client:      http.DefaultClient,
 			NameService: mockNameService,
-			retryConf: RetryConfig{
+			RetryConf: RetryConfig{
 				Enabled:       true,
 				Retries:       2,
 				RetryInterval: 10 * time.Millisecond,
@@ -649,7 +649,7 @@ func TestClient_sendWithENS_503_retry_no_retryAfter(t *testing.T) {
 		c := &Client{
 			Client:      http.DefaultClient,
 			NameService: mockNameService,
-			retryConf: RetryConfig{
+			RetryConf: RetryConfig{
 				Enabled:       true,
 				Retries:       2,
 				RetryInterval: 10 * time.Millisecond,

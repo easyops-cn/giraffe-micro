@@ -25,7 +25,7 @@ type Client struct {
 	*http.Client
 	Middleware  Middleware
 	NameService giraffe.NameService
-	retryConf   RetryConfig
+	RetryConf   RetryConfig
 }
 
 // ClientOption Client 配置函数
@@ -116,10 +116,10 @@ func (c *Client) sendWithENS(req *http.Request, contract giraffe.Contract) (resp
 		originalBody, _ = copyBody(req)
 	}
 
-	// 如果 retryConf.Enabled 为false, 获取 sendCount 的值为1，表示只执行一次，不会重试
-	sendCount := c.retryConf.getSendCount()
+	// 如果 RetryConf.Enabled 为false, 获取 sendCount 的值为1，表示只执行一次，不会重试
+	sendCount := c.RetryConf.getSendCount()
 
-	retryInterval := c.retryConf.RetryInterval
+	retryInterval := c.RetryConf.RetryInterval
 	addr := addrList[0]
 	i := 0
 	unavailableRetry := false
@@ -192,7 +192,7 @@ func NewClient(opts ...ClientOption) *Client {
 	for _, o := range opts {
 		o(c)
 	}
-	c.retryConf.init()
+	c.RetryConf.init()
 	return c
 }
 
@@ -215,6 +215,6 @@ func WithNameService(n giraffe.NameService) ClientOption {
 
 func WithRetryConfig(conf RetryConfig) ClientOption {
 	return func(c *Client) {
-		c.retryConf = conf
+		c.RetryConf = conf
 	}
 }
