@@ -6,12 +6,9 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
-	"sort"
 	"strconv"
 	"syscall"
 	"time"
-
-	"github.com/easyops-cn/giraffe-micro"
 )
 
 // Middleware 中间件定义
@@ -177,8 +174,6 @@ func (c *Client) getAllAddressesWithENS(ctx context.Context, contract giraffe.Co
 	if err != nil {
 		return
 	}
-	// 排序
-	sort.Strings(addresses)
 	return
 }
 
