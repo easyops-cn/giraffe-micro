@@ -568,7 +568,7 @@ func TestClient_getAllAddressesWithNS(t *testing.T) {
 			c := &Client{
 				NameService: nameService,
 			}
-			gotAddresses, err := c.getAllAddressesWithNS(nil, nil)
+			gotAddresses, err := c.getAllAddressesWithENS(nil, nil)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("getAllAddressesWithNS() error = %v, wantErr %v", err, tt.wantErr)
 				return

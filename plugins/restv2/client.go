@@ -9,6 +9,8 @@ import (
 	"strconv"
 	"syscall"
 	"time"
+
+	"github.com/easyops-cn/giraffe-micro"
 )
 
 // Middleware 中间件定义
