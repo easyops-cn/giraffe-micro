@@ -213,5 +213,6 @@ func WithNameService(n giraffe.NameService) ClientOption {
 func WithRetryConfig(conf RetryConfig) ClientOption {
 	return func(c *Client) {
 		c.retryConf = conf
+		c.retryConf.init()
 	}
 }
