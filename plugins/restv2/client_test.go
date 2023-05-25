@@ -481,7 +481,7 @@ func TestNewClient(t *testing.T) {
 				retryConf: RetryConfig{
 					RetryInterval: defaultWaitDuration,
 				},
-				Schema: "http",
+				Scheme: "http",
 			},
 		},
 	}
@@ -660,9 +660,9 @@ func TestClient_sendWithENS_503_retry_no_retryAfter(t *testing.T) {
 	})
 }
 
-func TestWithSchema(t *testing.T) {
+func TestWithScheme(t *testing.T) {
 	type args struct {
-		schema string
+		scheme string
 	}
 	tests := []struct {
 		name string
@@ -672,19 +672,19 @@ func TestWithSchema(t *testing.T) {
 		{
 			name: "success",
 			args: args{
-				schema: "https",
+				scheme: "https",
 			},
 			want: "https",
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := WithSchema(tt.args.schema)
+			got := WithScheme(tt.args.scheme)
 			client := &Client{}
 			got(client)
 
-			if !reflect.DeepEqual(client.Schema, tt.want) {
-				t.Errorf("WithSchema() = %v, want %v", client.Schema, tt.want)
+			if !reflect.DeepEqual(client.Scheme, tt.want) {
+				t.Errorf("WithScheme() = %v, want %v", client.Scheme, tt.want)
 			}
 		})
 	}
