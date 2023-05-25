@@ -25,6 +25,7 @@ type Client struct {
 	Middleware  Middleware
 	NameService giraffe.NameService
 	retryConf   RetryConfig
+	Scheme      string
 }
 
 // ClientOption Client 配置函数
@@ -111,6 +112,9 @@ func (c *Client) sendWithENS(req *http.Request, contract giraffe.Contract) (resp
 	// 备份 http body
 	var originalBody []byte
 	req.URL.Scheme = "http"
+	if c.Scheme != "" {
+		req.URL.Scheme = c.Scheme
+	}
 	if req != nil && req.Body != nil {
 		originalBody, _ = copyBody(req)
 	}
@@ -185,6 +189,7 @@ func NewClient(opts ...ClientOption) *Client {
 		Client:      &http.Client{},
 		Middleware:  DefaultMiddleware,
 		NameService: nil,
+		Scheme:      "http",
 	}
 	for _, o := range opts {
 		o(c)
@@ -214,5 +219,11 @@ func WithRetryConfig(conf RetryConfig) ClientOption {
 	return func(c *Client) {
 		c.retryConf = conf
 		c.retryConf.init()
+	}
+}
+
+func WithScheme(scheme string) ClientOption {
+	return func(c *Client) {
+		c.Scheme = scheme
 	}
 }
